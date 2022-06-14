@@ -1,9 +1,5 @@
 package Pokemon;
 
-import PokemonEditor.BlockArrayList;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.List;
 
 public class Physics {
@@ -12,7 +8,7 @@ public class Physics {
     private final double gravitation = 9.81;                //    m/s           //Veränderte Gravitation lässt Mario langsamer hoch gleiten
     private int pixelPerTimerPass = 1;                      //muss verändert werden für Geschwindigkeit,
     private final double timerPassInMs = 17;                           //so viele ms pro TimerDurchlauf
-    private long timeElapsedInMs;
+    private long timeElapsedInMs;  //TODO ersetzen durch gameLoopDurchgänge????
     private int jumpedPixelCounter = 0;
     private long fallStartTime;
     private long fallDuration = 0;
@@ -28,21 +24,15 @@ public class Physics {
     private int counterFrames = 0;
     private boolean isJumping = false;
     private boolean isFalling = false;
-    private boolean isRunning = true;
+    private boolean isRunning = true;                                                                                   //Gameloop
     Runnable animationRunnable;
     private Thread animationThread;
-    private volatile BufferedImage buffImageA;           //wird gerade angezeigt
-    private volatile BufferedImage buffImageB;           //steht parat für nächstes paint (kann NULL sein)
-    private volatile BufferedImage buffImageC;           //Wird gerade gemalt
-    private volatile BufferedImage buffImageD;           //Steht parat für das nächste Malen (ggf 2 Bilder)
-    private boolean isPainting = false;
-    Graphics graphicsBuffImageC;
-    boolean isDoRepaintActive = false;
-    private int sleepDuration = 10;
+    private final int sleepDuration = 10;
+    private int gameLoopCounter = 0;
+    private int gameLoops = 0;
+    private long startTime2 = 0;
+    private long end;//nötig??
 
-
-    private int FPS = 0;
-// Ein Counterdurchgang = 17ms
     // in 1 s = 58 Durchgänge = 58 Pixel
     // Mario 20 Pixel hoch = 2m?
     //Sprung = 300 Pixel = 30m?
@@ -53,7 +43,11 @@ public class Physics {
         animationRunnable = new Runnable() {
             @Override
             public void run() {
+                System.out.println("Aufruf GameLoop");
+                startTime2 = System.currentTimeMillis();
                 while (isRunning) {
+
+
                     if (canvas.isPressingLeftButton() && canvas.isPressingRightButton() && mario.getSpeed() == 0) {
                         mario.setFeetPosition(2);
                     }
@@ -76,22 +70,32 @@ public class Physics {
                         }
                     }
                     mario.move(mario.getSpeed());
-                    //////////////////////////////////// MOVETIMER VORBEI
+                    //////////////////////////////////// Ende des MoveEvents
                     if (isJumping) {
-                        mario.setDirection(Direction.UP);
-                        timerDrivenJumpMethod();
+                        mario.setDirection(Direction.UP);                                                               //Wenn Mario springt, dann setze Direction auf "up" //TODO doppelt?
+                        gameloopDrivenJumpMethod();
                     }
-                    if (isFalling) {
+                    if (isFalling) {                                                                                    //TODO Dieser Code verhindert die Möglichkeit die Fußstellung noch vor dem Erreichen des Bodens zurückzustellen
                         mario.setDirection(Direction.DOWN);                                                             //Wenn Mario fällt, dann setze Direction auf "down"
-                        timerDrivenFallMethod(jumpDownTimerSpeed);
+                        gameloopDrivenFallMethod(jumpDownTimerSpeed);
                     }
                     try {
                         Thread.sleep(sleepDuration);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
+                    /*
+                    Durchgänge pro Sekunde bei etwa 64
+                     */
+                    gameLoopCounter++;
+                    if (System.currentTimeMillis() - startTime2 >= 1000) {
+                        gameLoops = gameLoopCounter;
+                        canvas.repaint();
+                        gameLoopCounter = 0;
+                        startTime2 = System.currentTimeMillis();
+                    }
                 }
-                canvas.repaint();
             }
         };
         animationThread = new Thread(animationRunnable);
@@ -102,7 +106,7 @@ public class Physics {
         animationThread.start();
     }
 
-    private void timerDrivenFallMethod(int jumpDownTimerSpeed) {
+    private void gameloopDrivenFallMethod(int jumpDownTimerSpeed) {
         setFallDuration(System.currentTimeMillis() - (getFallStartTime()));
         jumpDownTimerSpeed = (int) (jumpDownTimerSpeed / getGravitation()) * (int) (getFallDuration() / mario.getFallDelay());
         for (int i = 0; i < jumpDownTimerSpeed; i++) {
@@ -119,12 +123,12 @@ public class Physics {
         }
     }
 
-    private void timerDrivenJumpMethod() {
+    private void gameloopDrivenJumpMethod() {
         setTimeElapsedInMs();     //Aktuell vergangene Zeit setzen
 
         for (int i = 0; i < getPixelPerTimerPass(); i++) {
             setTimeElapsedInMs();     //Aktuell vergangene Zeit setzen //TODO kann vielleicht weg
-            refreshPixelPerTimerPass(getPixelPerTimerPass());
+            refreshPixelPerTimerPass();
 
             //So viel PixelSprung pro Schleifendurchgang
             mario.moveUp(1);                                                                                       //eins nach oben pro Schleifendurchgang
@@ -189,8 +193,8 @@ public class Physics {
         return (int) (speedInMeterPerSecond);
     }
 
-    public Physics refreshPixelPerTimerPass(int pixelPerTimerPass) {
-        this.pixelPerTimerPass = pixelPerTimerPass;
+    public Physics refreshPixelPerTimerPass() {
+        this.pixelPerTimerPass = getPixelPerTimerPass();
         return this;
     }
 
@@ -299,5 +303,9 @@ public class Physics {
         return this;
     }
 
+
+    public int getGameLoops() {
+        return gameLoops;
+    }
 
 }

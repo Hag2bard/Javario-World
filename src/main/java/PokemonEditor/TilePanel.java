@@ -34,7 +34,7 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
     /**
      * Erhalte existierende Instanz, wenn diese existiert, sonst wird eine neue erstellt
      *
-     * @return
+     * @return TilePanel Instanz (wird im Zweifel erstellt)
      */
     public static TilePanel getInstance() {
         if (instance == null) {
@@ -46,7 +46,7 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
     /**
      * Getter-Methode für die TilePanel-Instanz wenn diese existiert
      *
-     * @return
+     * @return Existierende TilePanel Instanz
      */
     public static TilePanel getExistingInstance() {
         if (instance == null) {
@@ -121,9 +121,7 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
      * Bewegt ausgewählten Block nach rechts, wenn einer ausgewählt ist und wenn dieser nicht schon ganz rechts ist
      */
     public void moveRight() {
-
-
-        if (!selectedBlocksList.isEmpty() && selectedBlocksList.get((selectedBlocksList.size() - 1)).x < ((GuiData.tilesetWidth/TILESIZE)-1)) { //Wenn selectedBlocks nicht leer ist und die ganz rechte Auswahl kleiner ist als 15(bei 256 Pixel Breite)
+        if (!selectedBlocksList.isEmpty() && selectedBlocksList.get((selectedBlocksList.size() - 1)).x < ((GuiData.tilesetWidth / TILESIZE) - 1)) { //Wenn selectedBlocks nicht leer ist und die ganz rechte Auswahl kleiner ist als 15(bei 256 Pixel Breite)
             Point previousSelected = new Point(selectedBlocksList.get(0).x, selectedBlocksList.get(0).y);                                      //speichert vor den nachfolgenden Aktionen den gewählten Block zwischen
             selectedBlocksList.clear();                                                             //löscht alle selektieren Blocks aus der Liste
             for (int y = 0; y < amountOfSelectedBlocks; y++) {         //durchläuft for Schleife je nach Anzahl der selektierten Blocks und speichert die vorherigen Werte(x+1)
@@ -157,13 +155,7 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
      * Bewegt ausgewählten Block nach unten, wenn einer ausgewählt ist und wenn dieser nicht schon ganz unten ist
      */
     public void moveDown() {
-
-        // Dieser Code scrollt nach unten
-//        JScrollBar bar = PokeEditor.getInstance().getBar();
-//        bar.setValue(bar.getValue() + 100);
-//PokeEditor.getInstance().scrollTilePanel();
-
-        if (!selectedBlocksList.isEmpty() && selectedBlocksList.getLast().y < (GuiData.tilesetHeight/TILESIZE-1)) {  //Wenn selectedBlocks nicht leer ist und die unterste Auswahl kleiner ist als 997
+        if (!selectedBlocksList.isEmpty() && selectedBlocksList.getLast().y < (GuiData.tilesetHeight / TILESIZE - 1)) {  //Wenn selectedBlocks nicht leer ist und die unterste Auswahl kleiner ist als 997
             Point previousSelected = new Point(selectedBlocksList.get(0).x, selectedBlocksList.get(0).y);    //speichert vor den nachfolgenden Aktionen den gewählten Block zwischen
             selectedBlocksList.clear();                                                              //löscht alle selektieren Blocks aus der Liste
             for (int y = 0; y < amountOfSelectedBlocks; y++) {          //durchläuft for Schleife je nach Anzahl der selektierten Blocks und speichert die vorherigen Werte(y+1)
@@ -189,11 +181,9 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
         PokeEditor.getInstance().refreshTxtFieldAmountOfSelectedBlocks();               //Textfield aktualisieren
     }
 
-
     public LinkedList<Point> getSelectedBlocksList() {
         return selectedBlocksList;
     }
-
 
     public void setSelectedBlocksList(LinkedList<Point> selectedBlocksList) {
         this.selectedBlocksList = selectedBlocksList;

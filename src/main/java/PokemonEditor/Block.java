@@ -7,7 +7,6 @@ public class Block {
     private final Point destination;
     private boolean isDummy = true;
 
-
     public Block(int sourceX, int sourceY, int destinationX, int destinationY) {
         this.source = new Point(sourceX, sourceY);
         this.destination = new Point(destinationX, destinationY);
@@ -34,7 +33,6 @@ public class Block {
         this.source.y = source.y;
         return this;
     }
-
 
     public boolean isDummy() {
         return isDummy;

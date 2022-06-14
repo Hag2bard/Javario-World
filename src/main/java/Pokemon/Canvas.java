@@ -15,19 +15,19 @@ public class Canvas extends JPanel {    //Klasse Start
 
     private BufferedImage tilesetBufferedImage;
     private final BufferedImage spritesBufferedImage;
-    private final int ZOOM = 4; //TODO muss noch eingebaut werden 4 ist Standard
+    private final int ZOOM = 4;                                                                                         //TODO muss noch eingebaut werden 4 ist Standard
     private final int TILESIZE = 16;
-    private final int OFFSET = 11 * ZOOM;  //umso höher umso höher zeichnet er
-    //    private final Physics physics;   //ohne thread
-    private Physics physics;   //mit thread
+    private final int OFFSET = 11 * ZOOM;                                                                               //umso höher umso höher zeichnet er
+    //    private final Physics physics;                                                                                //ohne thread
+    private Physics physics;                                                                                            //mit thread
     private final Hero mario;
     //    private final MediaPlayer mediaPlayer;
     private final LoadMap loadMap;
     private boolean isPressingRightButton = false;
     private boolean isPressingLeftButton = false;
     private boolean isPressingSpaceButton = false;
-    private Thread physicsThread;
-    private Canvas canvas;
+    private final Thread physicsThread;
+    private final Canvas canvas;
     private long last_time;
     private long delta_time;
     private int counter;
@@ -35,22 +35,13 @@ public class Canvas extends JPanel {    //Klasse Start
 
     public Canvas() {    //Konstruktor Start
         canvas = this;
-        physicsThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                physics = new Physics(canvas);
-            }
-        });
+        physicsThread = new Thread(() -> physics = new Physics(canvas));
         physicsThread.start();
 //        physics = new Physics(this);  //Ohne Thread
         keyBinding();
         System.out.println(physics);
         mario = new Hero(this, physics);
         physics.startAnimation();
-
-
-//        mediaPlayer = new MediaPlayer();
-//        mediaPlayer.playWav();
         loadMap = new LoadMap();
 
         if (loadMap.getMapString() != null) {
@@ -67,11 +58,9 @@ public class Canvas extends JPanel {    //Klasse Start
 
         spritesBufferedImage = loadMap.getBufferedImage(GuiData.filenameSpriteSet);
 
-
         setFocusable(true);
         requestFocusInWindow();
     }
-
 
     public void keyBinding() {
         InputMap im = getInputMap(WHEN_IN_FOCUSED_WINDOW);
@@ -88,8 +77,6 @@ public class Canvas extends JPanel {    //Klasse Start
         am.put("pressedSpace", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                if (!pressingSpaceButton && !physics.getJumpTimer().isRunning() && !physics.getFallTimer().isRunning()) {                   //Doppelsprung wird vermieden durch diese If Bedingung
-//                if (!pressingSpaceButton && !physics.getJumpTimer().isRunning() && !physics.getFallTimer().isRunning()) {                   //Doppelsprung wird vermieden durch diese If Bedingung
                 if (!isPressingSpaceButton && !physics.getJumping() && !physics.getFalling()) {                   //Doppelsprung wird vermieden durch diese If Bedingung
                     isPressingSpaceButton = true;
                     if (mario.getDirection() == Direction.LEFT) {
@@ -137,7 +124,6 @@ public class Canvas extends JPanel {    //Klasse Start
                 if (physics.getJumping() && physics.getFalling()) {
                     mario.setFeetPosition(1);                                                                           //Feet Position 1 bei Jump heißt er guckt links
                 }
-//                physics.doRepaint();
                 repaint();
                 if (!isPressingRightButton) {                                                                              //Wenn kein anderer Button gedrückt wird, dann Mario anhalten durch Geschwindigkeit 0
                     mario.setSpeed(0);
@@ -179,7 +165,6 @@ public class Canvas extends JPanel {    //Klasse Start
             }
         });
 
-
         am.put("pressedR", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -187,7 +172,6 @@ public class Canvas extends JPanel {    //Klasse Start
             }
         });
     }
-
 
     public void paintLayer(Graphics g, BlockArrayList mapLayer) {
         for (int i = 0; i < mapLayer.size(); i++) {
@@ -200,56 +184,45 @@ public class Canvas extends JPanel {    //Klasse Start
             switch (mario.getFeetPosition()) {                                                                                                                        //+ZOOM=Korrektur
                 case 1 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 91, 17, 118 + 1, null); //links Fuß vorn
                 case 2 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 91, 35, 118 + 1, null); //links stehend
-                case 3 -> System.err.println("FALL 3 bei LEFT ist aufgetreten!!!!!!!!!!!!");
             }
         }
         if (direction.equals(Direction.RIGHT)) {
             switch (feetPosition) {                                                 // offset ist der Wert wieviel über 16 Pixel Block gezeichnet werden soll        //+ZOOM=Korrektur
                 case 1 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 31, 17, 58 + 1, null); //rechts Fuß vorn
                 case 2 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 31, 35, 58 + 1, null); //rechts stehend
-                case 3 -> System.err.println("FALL 3 bei RIGHT ist aufgetreten!!!!!!!!!!!!");
             }
         }
         if (direction.equals(Direction.UP)) {               //Springen
             switch (feetPosition) {
                 case 1 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 1, 1, 17, 28 + 1, null); //Springen links
                 case 2 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 19, 1, 35, 28 + 1, null); //Springen rechts
-                case 3 -> System.err.println("FALL 3 bei UP ist aufgetreten!!!!!!!!!!!!");
             }
         }
         if (direction.equals(Direction.DOWN)) {             //Fallen
             switch (feetPosition) {
                 case 1 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 1, 61, 17, 89, null); //Fallen links
                 case 2 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 19, 61, 35, 89, null); //Fallen rechts
-                case 3 -> System.err.println("FALL 3 bei DOWN ist aufgetreten!!!!!!!!!!!!");
             }
         }
         g.dispose();
     }
 
-
-
     @Override
     protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        
-        last_time = System.nanoTime();
+        g.drawString("TestDrawString", 150, 150);
+
         super.paintComponent(g);
         paintLayer(g, mapLayer1);                                                                                       //Layer1 wird gezeichnet
         paintLayer(g, mapLayer2);                                                                                       //Layer2 wird gezeichnet
+        g.drawString("GameLoops " + physics.getGameLoops(), 50, 50);
         paintHero(g, mario.getDirection(), mario.getFeetPosition(), mario.getPositionX(), mario.getPositionY());        //Mario wird gezeichnet, je nach Position, Blickrichtung, Fußposition (Lauf, Sprung, Fall)
 
-        if (counter > 10) {
-            delta_time = (System.nanoTime() - last_time) / 1000000;
-            counter = 0;
-        }
-        g.drawString("FrameTime: " + delta_time, 50, 50);
 
-        counter++;
-        }
+    }
 
-    
-
+    /*
+    Getter und Setter - Der spannendste Teil meines Codes
+     */
     public BlockArrayList getMapLayer1() {
         return mapLayer1;
     }
@@ -258,7 +231,6 @@ public class Canvas extends JPanel {    //Klasse Start
         return mapLayer2;
     }
 
-
     public BufferedImage getTilesetBufferedImage() {
         return tilesetBufferedImage;
     }
@@ -266,7 +238,6 @@ public class Canvas extends JPanel {    //Klasse Start
     public BufferedImage getSpritesBufferedImage() {
         return spritesBufferedImage;
     }
-
 
     public boolean isPressingRightButton() {
         return isPressingRightButton;
@@ -279,7 +250,6 @@ public class Canvas extends JPanel {    //Klasse Start
     public boolean isPressingSpaceButton() {
         return isPressingSpaceButton;
     }
-
 
     public int getOFFSET() {
         return OFFSET;
