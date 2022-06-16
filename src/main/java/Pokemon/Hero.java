@@ -19,6 +19,12 @@ public class Hero {
     private int feetPositionBackup;
     private Direction directionBackup;
 
+    Direction directionOld = getDirection();
+    int feetPositionOld = getFeetPosition();
+    int positionXOld = positionX;
+    int positionYOld = positionY;
+
+
     public Hero(Canvas canvas, Physics physics) {
         this.physics = physics;
         this.canvas = canvas;
@@ -27,6 +33,20 @@ public class Hero {
         positionX = 2 * TILESIZE * ZOOM;
         positionY = 10 * TILESIZE * ZOOM;
         physics.setHeroObject(this);
+    }
+
+    public boolean heroDataChanged(){
+        if (directionOld != getDirection() || feetPositionOld != getFeetPosition() || positionXOld != positionX || positionYOld != positionY){
+            return true;
+        }
+        return false;
+    }
+
+    public void refreshHeroData(){
+        directionOld = getDirection();
+        feetPositionOld = getFeetPosition();
+        positionXOld = positionX;
+        positionYOld = positionY;
     }
 
     public void doJump() {
