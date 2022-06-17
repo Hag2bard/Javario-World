@@ -18,12 +18,11 @@ public class Hero {
     private int fallDelay = 41;                                                                                         //Umso höher umso langsamer fällt Mario
     private int feetPositionBackup;
     private Direction directionBackup;
-
     Direction directionOld = getDirection();
     int feetPositionOld = getFeetPosition();
     int positionXOld = positionX;
     int positionYOld = positionY;
-
+    private boolean promptRepaintHero = false;
 
     public Hero(Canvas canvas, Physics physics) {
         this.physics = physics;
@@ -35,14 +34,19 @@ public class Hero {
         physics.setHeroObject(this);
     }
 
-    public boolean heroDataChanged(){
-        if (directionOld != getDirection() || feetPositionOld != getFeetPosition() || positionXOld != positionX || positionYOld != positionY){
+    public boolean heroDataChanged() {
+        if (promptRepaintHero) {
+            promptRepaintHero = false;
+            return true;
+        }
+        if (directionOld != getDirection() || feetPositionOld != getFeetPosition() || positionXOld != positionX || positionYOld != positionY) {
+            refreshHeroData();
             return true;
         }
         return false;
     }
 
-    public void refreshHeroData(){
+    public void refreshHeroData() {
         directionOld = getDirection();
         feetPositionOld = getFeetPosition();
         positionXOld = positionX;
@@ -58,8 +62,9 @@ public class Hero {
     }
 
     public void move(int speed) {                           //Bewegt Charakter in angegebener Geschwindigkeit (- oder +)
-        positionX += speed;
         if (speed != 0) {                                   //Bei Geschwindigkeit 0 muss nicht repainted werden
+            positionX += speed;
+            promptRepaintHero = true;
             canvas.repaint();
         }
     }
@@ -67,16 +72,16 @@ public class Hero {
     public void moveUp(int pixel) {
         for (int i = 0; i < pixel; i++) {
             positionY--;
+            promptRepaintHero = true;
             canvas.repaint();
-
         }
     }
 
     public void moveDown(int pixel) {
         for (int i = 0; i < pixel; i++) {
             positionY++;
+            promptRepaintHero = true;
             canvas.repaint();
-
         }
     }
 
@@ -98,6 +103,7 @@ public class Hero {
         } else {
             feetPosition = 2;
         }
+        promptRepaintHero = true;
         canvas.repaint();
 
     }
@@ -111,6 +117,7 @@ public class Hero {
 
     public Hero setFeetPosition(int feetPosition) {
         this.feetPosition = feetPosition;
+        promptRepaintHero = true;
         canvas.repaint();
         return this;
     }
@@ -121,6 +128,7 @@ public class Hero {
 
     public Hero setDirection(Direction direction) {
         this.direction = direction;
+        promptRepaintHero = true;
         canvas.repaint();
         return this;
     }
@@ -131,6 +139,7 @@ public class Hero {
 
     public Hero setPositionX(int positionX) {
         this.positionX = positionX;
+        promptRepaintHero = true;
         canvas.repaint();
         return this;
     }
@@ -203,5 +212,11 @@ public class Hero {
         this.finalPositionY = finalPositionY;
         return this;
     }
+
+    public Hero setPromptRepaintHero(boolean promptRepaintHero) {
+        this.promptRepaintHero = promptRepaintHero;
+        return this;
+    }
+
 
 }

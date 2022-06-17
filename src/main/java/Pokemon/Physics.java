@@ -117,10 +117,13 @@ public class Physics {
                 setFallDuration(0);
                 mario.setDirection(mario.getDirectionBackup());                                                         //Wenn während des Sprungs/Falls die Richtung durch Tastendruck gewechselt wird, wird das DirectionBackup damit überschrieben
                 mario.setFeetPosition(2);                                                                               //FußPosition 2 -> Mario steht
+                canvas.refreshHeroBufferedImage(mario.getDirection(), 2, mario.getPositionX(), mario.getPositionY());  //
                 canvas.repaint();
                 break;
             }
         }
+//        canvas.refreshHeroBufferedImage(mario.getDirection(), 2, mario.getPositionX(), mario.getPositionY());
+        canvas.repaint();
     }
 
     private void gameloopDrivenJumpMethod() {
