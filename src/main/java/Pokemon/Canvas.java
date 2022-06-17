@@ -32,32 +32,14 @@ public class Canvas extends JPanel {    //Klasse Start
     private int counter;
     private BufferedImage mapBufferedImage = new BufferedImage(1024, 860, BufferedImage.TYPE_INT_ARGB);
     private Graphics mapGraphics = mapBufferedImage.createGraphics();
-    private boolean accessingBufferedImageHeroB = false;
 
-    BufferedImage bufferedImageHeroA;
-    BufferedImage bufferedImageHeroB;
-    BufferedImage bufferedImageHeroC;
-    BufferedImage bufferedImageHeroD;
-    Graphics graphicsHero;
+    public Canvas setDrawingImage(BufferedImage drawingImage) {
+        this.drawingImage = drawingImage;
+        return this;
+    }
 
-    Thread refreshBufferedImagesThread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            while (true) {
-                if (mario.heroDataChanged()) {
-                    refreshHeroBufferedImage(mario.getDirection(), mario.getFeetPosition(), mario.getPositionX(), mario.getPositionY());        //Mario wird gezeichnet, je nach Position, Blickrichtung, Fußposition (Lauf, Sprung, Fall)
-                    System.out.println("refreshed");
-                } else {
-                    try {
-                        Thread.sleep(0);                                                                          //Workaround, sonst //TODO
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
+    BufferedImage drawingImage;
 
-    });
 
     public Canvas() {    //Konstruktor Start
         canvas = this;
@@ -84,8 +66,6 @@ public class Canvas extends JPanel {    //Klasse Start
 
         spritesBufferedImage = loadMap.getBufferedImage(GuiData.filenameSpriteSet);
 
-        refreshBufferedImagesThread.start();
-        refreshMapBufferedImage();
 
         setFocusable(true);
         requestFocusInWindow();
@@ -201,7 +181,6 @@ public class Canvas extends JPanel {    //Klasse Start
 //                mario.setFeetPosition(2);
 
                 System.out.println("Pressed R!");
-                refreshHeroBufferedImage(mario.getDirection(), 2, mario.getPositionX(), mario.getPositionY());
                 canvas.repaint();
 
             }
@@ -217,49 +196,49 @@ public class Canvas extends JPanel {    //Klasse Start
         }
     }
 
-    public void refreshHeroBufferedImage(Direction direction, int feetPosition, int positionX, int positionY) {
-        if (System.currentTimeMillis() - last_time > 15 || !isPressingRightButton && !isPressingLeftButton) {           //Nur neu zeichnen wenn mehr als 15ms vergangen sind (66,66 FPS) oder er nicht bewegt wird (Workaround, da er nach dem Fallen nicht mehr die buffImages refresht hat
-            bufferedImageHeroC = new BufferedImage(1024, 860, BufferedImage.TYPE_INT_ARGB);
-            graphicsHero = bufferedImageHeroC.createGraphics();
-
-            if (mario.getDirection().equals(Direction.LEFT)) {
-                switch (mario.getFeetPosition()) {                                                                                                                        //+ZOOM=Korrektur
-                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 91, 17, 118 + 1, null); //links Fuß vorn
-                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 91, 35, 118 + 1, null); //links stehend
-                }
-            }
-            if (direction.equals(Direction.RIGHT)) {
-                switch (feetPosition) {                                                 // offset ist der Wert wieviel über 16 Pixel Block gezeichnet werden soll        //+ZOOM=Korrektur
-                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 31, 17, 58 + 1, null); //rechts Fuß vorn
-                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 31, 35, 58 + 1, null); //rechts stehend
-                }
-            }
-            if (direction.equals(Direction.UP)) {               //Springen
-                switch (feetPosition) {
-                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 1, 1, 17, 28 + 1, null); //Springen links
-                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 19, 1, 35, 28 + 1, null); //Springen rechts
-                }
-            }
-            if (direction.equals(Direction.DOWN)) {             //Fallen
-                switch (feetPosition) {
-                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 1, 61, 17, 89, null); //Fallen links
-                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 19, 61, 35, 89, null); //Fallen rechts
-                }
-            }
-            mario.refreshHeroData();
-            if (!accessingBufferedImageHeroB) {
-                if (bufferedImageHeroB != null) {
-                    accessingBufferedImageHeroB = true;
-                    bufferedImageHeroD = bufferedImageHeroB;
-                }
-                accessingBufferedImageHeroB = true;
-                bufferedImageHeroB = bufferedImageHeroC;
-                accessingBufferedImageHeroB = false;
-                bufferedImageHeroC = null;
-            }
-            last_time = System.currentTimeMillis();
-        }
-    }
+//    public void refreshHeroBufferedImage(Direction direction, int feetPosition, int positionX, int positionY) {
+//        if (System.currentTimeMillis() - last_time > 15 || !isPressingRightButton && !isPressingLeftButton) {           //Nur neu zeichnen wenn mehr als 15ms vergangen sind (66,66 FPS) oder er nicht bewegt wird (Workaround, da er nach dem Fallen nicht mehr die buffImages refresht hat
+//            bufferedImageHeroC = new BufferedImage(1024, 860, BufferedImage.TYPE_INT_ARGB);
+//            graphicsHero = bufferedImageHeroC.createGraphics();
+//
+//            if (mario.getDirection().equals(Direction.LEFT)) {
+//                switch (mario.getFeetPosition()) {                                                                                                                        //+ZOOM=Korrektur
+//                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 91, 17, 118 + 1, null); //links Fuß vorn
+//                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 91, 35, 118 + 1, null); //links stehend
+//                }
+//            }
+//            if (direction.equals(Direction.RIGHT)) {
+//                switch (feetPosition) {                                                 // offset ist der Wert wieviel über 16 Pixel Block gezeichnet werden soll        //+ZOOM=Korrektur
+//                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 31, 17, 58 + 1, null); //rechts Fuß vorn
+//                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 31, 35, 58 + 1, null); //rechts stehend
+//                }
+//            }
+//            if (direction.equals(Direction.UP)) {               //Springen
+//                switch (feetPosition) {
+//                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 1, 1, 17, 28 + 1, null); //Springen links
+//                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 19, 1, 35, 28 + 1, null); //Springen rechts
+//                }
+//            }
+//            if (direction.equals(Direction.DOWN)) {             //Fallen
+//                switch (feetPosition) {
+//                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 1, 61, 17, 89, null); //Fallen links
+//                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 19, 61, 35, 89, null); //Fallen rechts
+//                }
+//            }
+//            mario.refreshHeroData();
+//            if (!accessingBufferedImageHeroB) {
+//                if (bufferedImageHeroB != null) {
+//                    accessingBufferedImageHeroB = true;
+//                    bufferedImageHeroD = bufferedImageHeroB;
+//                }
+//                accessingBufferedImageHeroB = true;
+//                bufferedImageHeroB = bufferedImageHeroC;
+//                accessingBufferedImageHeroB = false;
+//                bufferedImageHeroC = null;
+//            }
+//            last_time = System.currentTimeMillis();
+//        }
+//    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -269,17 +248,7 @@ public class Canvas extends JPanel {    //Klasse Start
         }
         g.drawString("GameLoops " + physics.getGameLoops(), 50, 50);
 
-        if (bufferedImageHeroB != null) {
-            bufferedImageHeroD = bufferedImageHeroA;
-            if (!accessingBufferedImageHeroB) {
-                accessingBufferedImageHeroB = true;
-                bufferedImageHeroA = bufferedImageHeroB;
-                bufferedImageHeroB = null;
-                accessingBufferedImageHeroB = false;
-            }
-        }
-        g.drawImage(bufferedImageHeroA, 0, 0, this);
-
+        g.drawImage(physics.imageManagement.getCurrentViewingImage(), 0, 0, this);
     }
 
 

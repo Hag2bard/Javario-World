@@ -32,6 +32,7 @@ public class Physics {
     private int gameLoops = 0;
     private long startTime2 = 0;
     private long end;//nötig??
+    ImageManagement imageManagement;
 
     // in 1 s = 58 Durchgänge = 58 Pixel
     // Mario 20 Pixel hoch = 2m?
@@ -40,6 +41,7 @@ public class Physics {
 
     public Physics(Canvas canvas) {
         this.canvas = canvas;
+        imageManagement = new ImageManagement(1024, 860);
         animationRunnable = new Runnable() {
             @Override
             public void run() {
@@ -91,6 +93,7 @@ public class Physics {
                     gameLoopCounter++;
                     if (System.currentTimeMillis() - startTime2 >= 1000) {
                         gameLoops = gameLoopCounter;
+                        canvas.setDrawingImage(imageManagement.getNextDrawingImage());
                         canvas.repaint();
                         gameLoopCounter = 0;
                         startTime2 = System.currentTimeMillis();
@@ -116,7 +119,6 @@ public class Physics {
                 setFallDuration(0);
                 mario.setDirection(mario.getDirectionBackup());                                                         //Wenn während des Sprungs/Falls die Richtung durch Tastendruck gewechselt wird, wird das DirectionBackup damit überschrieben
                 mario.setFeetPosition(2);                                                                               //FußPosition 2 -> Mario steht
-                canvas.refreshHeroBufferedImage(mario.getDirection(), 2, mario.getPositionX(), mario.getPositionY());  //
                 canvas.repaint();
                 break;
             }
