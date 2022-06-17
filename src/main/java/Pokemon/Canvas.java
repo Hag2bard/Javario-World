@@ -1,7 +1,6 @@
 package Pokemon;
 
 import PokemonEditor.*;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -219,7 +218,7 @@ public class Canvas extends JPanel {    //Klasse Start
     }
 
     public void refreshHeroBufferedImage(Direction direction, int feetPosition, int positionX, int positionY) {
-        if (System.currentTimeMillis() - last_time > 15 || !isPressingRightButton && !isPressingLeftButton) {
+        if (System.currentTimeMillis() - last_time > 15 || !isPressingRightButton && !isPressingLeftButton) {           //Nur neu zeichnen wenn mehr als 15ms vergangen sind (66,66 FPS) oder er nicht bewegt wird (Workaround, da er nach dem Fallen nicht mehr die buffImages refresht hat
             bufferedImageHeroC = new BufferedImage(1024, 860, BufferedImage.TYPE_INT_ARGB);
             graphicsHero = bufferedImageHeroC.createGraphics();
 

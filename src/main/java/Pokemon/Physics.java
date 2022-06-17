@@ -101,7 +101,6 @@ public class Physics {
         animationThread = new Thread(animationRunnable);
     }
 
-
     public void startAnimation() {
         animationThread.start();
     }
@@ -122,7 +121,6 @@ public class Physics {
                 break;
             }
         }
-//        canvas.refreshHeroBufferedImage(mario.getDirection(), 2, mario.getPositionX(), mario.getPositionY());
         canvas.repaint();
     }
 
@@ -155,8 +153,6 @@ public class Physics {
                 break;                                                                                                  //Wenn If Bedingung eintritt, for Schleife abbrechen
             }
         }
-
-
     }
 
 
@@ -305,7 +301,6 @@ public class Physics {
         this.isFalling = falling;
         return this;
     }
-
 
     public int getGameLoops() {
         return gameLoops;
