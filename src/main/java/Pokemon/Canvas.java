@@ -1,24 +1,33 @@
 package Pokemon;
 
 import PokemonEditor.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
+import static PokemonEditor.MapPanel.ZOOM;
+import static PokemonEditor.TilePanel.TILESIZE;
+
 public class Canvas extends JPanel {    //Klasse Start
 
-    private BlockArrayList mapLayer1;
-    private BlockArrayList mapLayer2;
+    private BlockArrayList mapLayer1 = null;
+    private BlockArrayList mapLayer2 = null;
 
     private BufferedImage tilesetBufferedImage;
     private final BufferedImage spritesBufferedImage;
-    private final int ZOOM = 4;                                                                                         //TODO muss noch eingebaut werden 4 ist Standard
+    private static final int ZOOM = 4;                                                                                         //TODO muss noch eingebaut werden 4 ist Standard
     private final int TILESIZE = 16;
     private final int OFFSET = 11 * ZOOM;                                                                               //umso höher umso höher zeichnet er
     //    private final Physics physics;                                                                                //ohne thread
     private Physics physics;                                                                                            //mit thread
+
+    public Hero getMario() {
+        return mario;
+    }
+
     private final Hero mario;
     //    private final MediaPlayer mediaPlayer;
     private final LoadMap loadMap;
@@ -30,8 +39,8 @@ public class Canvas extends JPanel {    //Klasse Start
     private long last_time;
     private long delta_time;
     private int counter;
-    private BufferedImage mapBufferedImage = new BufferedImage(1024, 860, BufferedImage.TYPE_INT_ARGB);
-    private Graphics mapGraphics = mapBufferedImage.createGraphics();
+    private BufferedImage mapBufferedImage = null;
+    private int timer = 0;
 
     public Canvas setDrawingImage(BufferedImage drawingImage) {
         this.drawingImage = drawingImage;
@@ -43,19 +52,20 @@ public class Canvas extends JPanel {    //Klasse Start
 
     public Canvas() {    //Konstruktor Start
         canvas = this;
-        physicsThread = new Thread(() -> physics = new Physics(canvas));
-        physicsThread.start();
-//        physics = new Physics(this);  //Ohne Thread
-        keyBinding();
-        System.out.println(physics);
-        mario = new Hero(this, physics);
-        physics.startAnimation();
-        loadMap = new LoadMap();
 
+        loadMap = new LoadMap();
         if (loadMap.getMapString() != null) {
             this.mapLayer1 = loadMap.getLoadedMap()[0];
             this.mapLayer2 = loadMap.getLoadedMap()[1];
         }
+
+        physics = new Physics(this);
+        physicsThread = new Thread(physics);
+        physicsThread.start();
+//        physics = new Physics(this);  //Ohne Thread
+        physics.setRunning(true);
+        mario = new Hero(this, physics);
+
 
         try {
             tilesetBufferedImage = TilePanel.getExistingInstance().getBufferedImage();
@@ -69,6 +79,8 @@ public class Canvas extends JPanel {    //Klasse Start
 
         setFocusable(true);
         requestFocusInWindow();
+        keyBinding();
+
     }
 
     public void keyBinding() {
@@ -187,68 +199,21 @@ public class Canvas extends JPanel {    //Klasse Start
         });
     }
 
-    private void refreshMapBufferedImage() {
-        for (int i = 0; i < mapLayer1.size(); i++) {
-            mapGraphics.drawImage(canvas.getTilesetBufferedImage(), mapLayer1.get(i).getDestinationX() * TILESIZE * ZOOM, mapLayer1.get(i).getDestinationY() * TILESIZE * ZOOM, (mapLayer1.get(i).getDestinationX() + 1) * TILESIZE * ZOOM, (mapLayer1.get(i).getDestinationY() + 1) * TILESIZE * ZOOM, mapLayer1.get(i).getSourceX() * TILESIZE, mapLayer1.get(i).getSourceY() * TILESIZE, (mapLayer1.get(i).getSourceX() + 1) * TILESIZE, (mapLayer1.get(i).getSourceY() + 1) * TILESIZE, null);
-        }
-        for (int i = 0; i < mapLayer2.size(); i++) {
-            mapGraphics.drawImage(canvas.getTilesetBufferedImage(), mapLayer2.get(i).getDestinationX() * TILESIZE * ZOOM, mapLayer2.get(i).getDestinationY() * TILESIZE * ZOOM, (mapLayer2.get(i).getDestinationX() + 1) * TILESIZE * ZOOM, (mapLayer2.get(i).getDestinationY() + 1) * TILESIZE * ZOOM, mapLayer2.get(i).getSourceX() * TILESIZE, mapLayer2.get(i).getSourceY() * TILESIZE, (mapLayer2.get(i).getSourceX() + 1) * TILESIZE, (mapLayer2.get(i).getSourceY() + 1) * TILESIZE, null);
-        }
-    }
-
-//    public void refreshHeroBufferedImage(Direction direction, int feetPosition, int positionX, int positionY) {
-//        if (System.currentTimeMillis() - last_time > 15 || !isPressingRightButton && !isPressingLeftButton) {           //Nur neu zeichnen wenn mehr als 15ms vergangen sind (66,66 FPS) oder er nicht bewegt wird (Workaround, da er nach dem Fallen nicht mehr die buffImages refresht hat
-//            bufferedImageHeroC = new BufferedImage(1024, 860, BufferedImage.TYPE_INT_ARGB);
-//            graphicsHero = bufferedImageHeroC.createGraphics();
-//
-//            if (mario.getDirection().equals(Direction.LEFT)) {
-//                switch (mario.getFeetPosition()) {                                                                                                                        //+ZOOM=Korrektur
-//                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 91, 17, 118 + 1, null); //links Fuß vorn
-//                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 91, 35, 118 + 1, null); //links stehend
-//                }
-//            }
-//            if (direction.equals(Direction.RIGHT)) {
-//                switch (feetPosition) {                                                 // offset ist der Wert wieviel über 16 Pixel Block gezeichnet werden soll        //+ZOOM=Korrektur
-//                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 31, 17, 58 + 1, null); //rechts Fuß vorn
-//                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 31, 35, 58 + 1, null); //rechts stehend
-//                }
-//            }
-//            if (direction.equals(Direction.UP)) {               //Springen
-//                switch (feetPosition) {
-//                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 1, 1, 17, 28 + 1, null); //Springen links
-//                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 19, 1, 35, 28 + 1, null); //Springen rechts
-//                }
-//            }
-//            if (direction.equals(Direction.DOWN)) {             //Fallen
-//                switch (feetPosition) {
-//                    case 1 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 1, 61, 17, 89, null); //Fallen links
-//                    case 2 -> graphicsHero.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 19, 61, 35, 89, null); //Fallen rechts
-//                }
-//            }
-//            mario.refreshHeroData();
-//            if (!accessingBufferedImageHeroB) {
-//                if (bufferedImageHeroB != null) {
-//                    accessingBufferedImageHeroB = true;
-//                    bufferedImageHeroD = bufferedImageHeroB;
-//                }
-//                accessingBufferedImageHeroB = true;
-//                bufferedImageHeroB = bufferedImageHeroC;
-//                accessingBufferedImageHeroB = false;
-//                bufferedImageHeroC = null;
-//            }
-//            last_time = System.currentTimeMillis();
-//        }
-//    }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        if (mapBufferedImage == null) {
+            mapBufferedImage = physics.imageManagement.getMapImage();  //??
+        }
         if (mapBufferedImage != null) {
             g.drawImage(mapBufferedImage, 0, 0, this);
         }
-        g.drawString("GameLoops " + physics.getGameLoops(), 50, 50);
 
         g.drawImage(physics.imageManagement.getCurrentViewingImage(), 0, 0, this);
+
+        if (physics.getPerformance() != null)
+            g.drawString(physics.getPerformance(), 50, 50);
     }
 
 

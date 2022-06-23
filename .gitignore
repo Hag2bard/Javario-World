@@ -37,3 +37,4 @@
 /log.log
 /.idea/artifacts/Javomon_jar.xml
 /.idea/jarRepositories.xml
+/target/classes/Pokemon/ImageManagement.class

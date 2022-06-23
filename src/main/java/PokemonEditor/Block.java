@@ -6,12 +6,21 @@ public class Block {
     private final Point source;
     private final Point destination;
     private boolean isDummy = true;
+    private boolean collides;
 
     public Block(int sourceX, int sourceY, int destinationX, int destinationY) {
         this.source = new Point(sourceX, sourceY);
         this.destination = new Point(destinationX, destinationY);
     }
+    public boolean collides() {
+        return collides;
+    }
 
+    public Block setCollides(boolean collides) {
+        this.collides = collides;
+        return this;
+    }
+    
     public int getSourceX() {
         return source.x;
     }

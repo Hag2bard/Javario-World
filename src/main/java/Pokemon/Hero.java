@@ -39,33 +39,19 @@ public class Hero {
             promptRepaintHero = false;
             return true;
         }
-        if (directionOld != getDirection() || feetPositionOld != getFeetPosition() || positionXOld != positionX || positionYOld != positionY) {
-            refreshHeroData();
-            return true;
-        }
         return false;
     }
 
-    public void refreshHeroData() {
-        directionOld = getDirection();
-        feetPositionOld = getFeetPosition();
-        positionXOld = positionX;
-        positionYOld = positionY;
-    }
-
     public void doJump() {
-        if (!physics.getJumping() && !physics.getFalling()) {
             finalPositionY = getPositionY() - physics.getJumpedPixelCounter();
             physics.setStart(System.currentTimeMillis());
             physics.setJumping(true);
-        }
     }
 
     public void move(int speed) {                           //Bewegt Charakter in angegebener Geschwindigkeit (- oder +)
         if (speed != 0) {                                   //Bei Geschwindigkeit 0 muss nicht repainted werden
             positionX += speed;
             promptRepaintHero = true;
-            canvas.repaint();
         }
     }
 
@@ -73,7 +59,6 @@ public class Hero {
         for (int i = 0; i < pixel; i++) {
             positionY--;
             promptRepaintHero = true;
-            canvas.repaint();
         }
     }
 
@@ -81,7 +66,6 @@ public class Hero {
         for (int i = 0; i < pixel; i++) {
             positionY++;
             promptRepaintHero = true;
-            canvas.repaint();
         }
     }
 
@@ -104,7 +88,6 @@ public class Hero {
             feetPosition = 2;
         }
         promptRepaintHero = true;
-        canvas.repaint();
 
     }
 
@@ -118,7 +101,6 @@ public class Hero {
     public Hero setFeetPosition(int feetPosition) {
         this.feetPosition = feetPosition;
         promptRepaintHero = true;
-        canvas.repaint();
         return this;
     }
 
@@ -129,7 +111,6 @@ public class Hero {
     public Hero setDirection(Direction direction) {
         this.direction = direction;
         promptRepaintHero = true;
-        canvas.repaint();
         return this;
     }
 
@@ -140,7 +121,6 @@ public class Hero {
     public Hero setPositionX(int positionX) {
         this.positionX = positionX;
         promptRepaintHero = true;
-        canvas.repaint();
         return this;
     }
 

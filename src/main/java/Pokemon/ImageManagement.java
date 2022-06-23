@@ -1,12 +1,17 @@
 package Pokemon;
 
+import PokemonEditor.BlockArrayList;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import static PokemonEditor.TilePanel.TILESIZE;
 
 /**
- * Management of Images for
+ * Management of Images for (KonradN - java-forum.org)
  */
 public class ImageManagement {
 
+    private static final int ZOOM = 4;
     private Object viewingImageLock = new Object();
 
     /**
@@ -25,6 +30,8 @@ public class ImageManagement {
 
     private volatile BufferedImage currentViewingImage;
     private volatile BufferedImage nextViewingImage;
+    private Physics physics;
+    private volatile BufferedImage staticMapImage;
 
     /**
      * Creates a new instance of ImageManagement;
@@ -32,10 +39,10 @@ public class ImageManagement {
      * @param width  width of images.
      * @param height height of images.
      */
-    public ImageManagement(int width, int height) {
+    public ImageManagement(int width, int height, Physics physics) {
         this.width = width;
         this.height = height;
-
+        this.physics = physics;
         currentDrawingImage = createImage();
         nextDrawingImage1 = createImage();
         nextDrawingImage2 = createImage();
@@ -47,7 +54,7 @@ public class ImageManagement {
      * @return BufferedImage to use.
      */
     private BufferedImage createImage() {
-        return new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
     }
 
     /**
@@ -102,10 +109,31 @@ public class ImageManagement {
             nextDrawingImage2 = null;
         }
 
-        // Check if resize happened
-        if (currentDrawingImage.getWidth() != width || currentDrawingImage.getHeight() != height)
+//         Check if resize happened
+        if (currentDrawingImage == null || currentDrawingImage.getWidth() != width || currentDrawingImage.getHeight() != height)
+//        if (physics.getMario().heroDataChanged())
             currentDrawingImage = createImage();
 
         return currentDrawingImage;
     }
+
+    public BufferedImage getMapImage(){
+        BufferedImage mapImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics mapGraphics = mapImage.createGraphics();
+        BlockArrayList mapLayer1 = physics.getCanvas().getMapLayer1();
+        BlockArrayList mapLayer2 = physics.getCanvas().getMapLayer2();
+
+        for (int i = 0; i < mapLayer1.size(); i++) {
+            mapGraphics.drawImage(physics.getCanvas().getTilesetBufferedImage(), mapLayer1.get(i).getDestinationX() * TILESIZE * ZOOM, mapLayer1.get(i).getDestinationY() * TILESIZE * ZOOM, (mapLayer1.get(i).getDestinationX() + 1) * TILESIZE * ZOOM, (mapLayer1.get(i).getDestinationY() + 1) * TILESIZE * ZOOM, mapLayer1.get(i).getSourceX() * TILESIZE, mapLayer1.get(i).getSourceY() * TILESIZE, (mapLayer1.get(i).getSourceX() + 1) * TILESIZE, (mapLayer1.get(i).getSourceY() + 1) * TILESIZE, null);
+        }
+        for (int i = 0; i < mapLayer2.size(); i++) {
+            mapGraphics.drawImage(physics.getCanvas().getTilesetBufferedImage(), mapLayer2.get(i).getDestinationX() * TILESIZE * ZOOM, mapLayer2.get(i).getDestinationY() * TILESIZE * ZOOM, (mapLayer2.get(i).getDestinationX() + 1) * TILESIZE * ZOOM, (mapLayer2.get(i).getDestinationY() + 1) * TILESIZE * ZOOM, mapLayer2.get(i).getSourceX() * TILESIZE, mapLayer2.get(i).getSourceY() * TILESIZE, (mapLayer2.get(i).getSourceX() + 1) * TILESIZE, (mapLayer2.get(i).getSourceY() + 1) * TILESIZE, null);
+        }
+        mapGraphics.dispose();
+        return mapImage;
+    }
+
+
+
+
 }
