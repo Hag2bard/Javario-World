@@ -36,19 +36,7 @@ public class Canvas extends JPanel {    //Klasse Start
     private boolean isPressingSpaceButton = false;
     private final Thread physicsThread;
     private final Canvas canvas;
-    private long last_time;
-    private long delta_time;
-    private int counter;
     private BufferedImage mapBufferedImage = null;
-    private int timer = 0;
-
-    public Canvas setDrawingImage(BufferedImage drawingImage) {
-        this.drawingImage = drawingImage;
-        return this;
-    }
-
-    BufferedImage drawingImage;
-
 
     public Canvas() {    //Konstruktor Start
         canvas = this;

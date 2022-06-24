@@ -62,7 +62,7 @@ public class BlockArrayList {
                 .thenComparingInt(Block::getDestinationX));
     }
 
-    public void add(int sourceX, int sourceY, int destinationX, int destinationY) {
+    public void add(int sourceX, int sourceY, int destinationX, int destinationY, boolean collides) {
         if (doesExist(destinationX, destinationY)) {
             if (isReplaceable || blockArrayList
                     .get(indexOfCoordinates(destinationX, destinationY))
@@ -70,11 +70,12 @@ public class BlockArrayList {
                 blockArrayList
                         .get(indexOfCoordinates(destinationX, destinationY))
                         .setSource(new Point(sourceX, sourceY))
+                        .setCollides(collides)
                         .setDummy(false);
             }
         }
         if (!doesExist(destinationX, destinationY)) {
-            blockArrayList.add(new Block(sourceX, sourceY, destinationX, destinationY));
+            blockArrayList.add(new Block(sourceX, sourceY, destinationX, destinationY, collides));
             blockArrayList
                     .getLast()
                     .setDummy(false);

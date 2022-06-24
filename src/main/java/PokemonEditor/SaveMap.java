@@ -32,7 +32,10 @@ public class SaveMap {
                     .append(mapArrayLayer1.get(i).getSourceX())
                     .append(";")
                     .append(mapArrayLayer1.get(i).getSourceY())
+                    .append(";")
+                    .append((mapArrayLayer1.get(i).collides()))
                     .append(";");
+
         }
         mapStringBuilder.append("NEXTLAYER");
         for (int i = 0; i < mapArrayLayer2.size(); i++) {
@@ -44,6 +47,8 @@ public class SaveMap {
                     .append(mapArrayLayer2.get(i).getSourceX())
                     .append(";")
                     .append(mapArrayLayer2.get(i).getSourceY())
+                    .append(";")
+                    .append((mapArrayLayer1.get(i).collides()))
                     .append(";");
         }
         return mapStringBuilder.toString();

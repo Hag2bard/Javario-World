@@ -52,95 +52,177 @@ public class LoadMap {
         return mapString;
     }
 
+    /**
+     * Der String wird erstmal an der Stelle NEXTLAYER getrennt und in 2 Arrays verteilt.
+     * Danach werden die Arrays in einer for Schleife durchlaufen und den Semikolons(;) geteilt und in 5 temporäre Strings gespeichert
+     *
+     * @param mapString
+     * @return
+     */
     private BlockArrayList[] convertStringToMap(String mapString) {
-        layerStringArray = this.mapString.split("NEXTLAYER");
-        mapLayer1StringArray = layerStringArray[0].split(";");
-        mapLayer2StringArray = layerStringArray[1].split(";");
-        String temp0 = null;
-        String temp1 = null;
-        String temp2 = null;
-        String temp3 = null;
-        int tempInt0 = 0;
-        int tempInt1 = 0;
-        int tempInt2 = 0;
-        int tempInt3 = 0;
+        layerStringArray = this.mapString.split("NEXTLAYER");                                                     //Der String wird erstmal an der Stelle NEXTLAYER getrennt
+        mapLayer1StringArray = layerStringArray[0].split(";");                                                    //Es entsteht ein String Array mit 2 Indizes.
+        mapLayer2StringArray = layerStringArray[1].split(";");                                                    //Diese Strings werden an den Semikolons(;) getrennt und in ein jeweils eigenes StringArray gespeichert
+        String tempStringSourceX = null;                                                                                            //int SourceX
+        String tempStringSourceY = null;                                                                                            //int SourceY
+        String tempStringDestinationX = null;                                                                                            //int DestinationX
+        String tempStringDestinationY = null;                                                                                            //int DestinationY
+        String tempStringKollision = null;                                                                                            //Boolean Kollision
+        int tempIntSourceX = 0;                                                                                               //int SourceX
+        int tempIntSourceY = 0;                                                                                               //int SourceY
+        int tempIntDestinationX = 0;                                                                                               //int DestinationX
+        int tempIntDestinationY = 0;                                                                                               //int DestinationY
+        boolean tempBooleanCollision;                                                                                            //Boolean Kollision
 
-        BlockArrayList mapLayer1 = new BlockArrayList();
-        BlockArrayList mapLayer2 = new BlockArrayList();
-        int counter = 0;
-        for (int i = 0; i < mapLayer1StringArray.length; i++) {
+        BlockArrayList mapLayer1 = new BlockArrayList();                                                                //Hier entstehen bereits die BlockArrayLists
+        BlockArrayList mapLayer2 = new BlockArrayList();                                                                //Hier entstehen bereits die BlockArrayLists
+        int counter = 0;                                                                                                //Counter geht bis 5 und wird dann wieder 0, da alle 5 Stellen des String Arrays einmal alle Informationen für einen Block gespeichert sind
+        for (int i = 0; i < mapLayer1StringArray.length; i++) {                                                         //Das Layer1 String Array wird durchlaufen
 
             switch (counter) {
-                case 0 -> {
-                    temp0 = mapLayer1StringArray[i];
-                    temp0 = temp0.trim();
+                case 0 -> {                                                                                             //An Stelle 0 haben wir SourceX
+                    tempStringSourceX = mapLayer1StringArray[i];
+                    tempStringSourceX = tempStringSourceX.trim();
                 }
-                case 1 -> {
-                    temp1 = mapLayer1StringArray[i];
-                    temp1 = temp1.trim();
+                case 1 -> {                                                                                             //An Stelle 1 haben wir SourceY
+                    tempStringSourceY = mapLayer1StringArray[i];
+                    tempStringSourceY = tempStringSourceY.trim();
                 }
-                case 2 -> {
-                    temp2 = mapLayer1StringArray[i];
-                    temp2 = temp2.trim();
+                case 2 -> {                                                                                             //An Stelle 2 haben wir DestinationX
+                    tempStringDestinationX = mapLayer1StringArray[i];
+                    tempStringDestinationX = tempStringDestinationX.trim();
                 }
-                case 3 -> {
-                    temp3 = mapLayer1StringArray[i];
-                    temp3 = temp3.trim();
-
+                case 3 -> {                                                                                             //An Stelle 3 haben wir DestinationY
+                    tempStringDestinationY = mapLayer1StringArray[i];
+                    tempStringDestinationY = tempStringDestinationY.trim();
                 }
-                default -> throw new IllegalStateException("Unexpected value: " + counter);
+                case 4 -> {                                                                                             //An Stelle 4 haben wir Kollision
+                    tempStringKollision = mapLayer1StringArray[i];
+                    tempStringKollision = tempStringKollision.trim();
+                }
+                default -> throw new IllegalStateException("Der Counter wurde nicht zurückgesetzt: " + counter);
             }
 
             counter++;
-            if (counter == 4) {
-                counter = 0;
-                tempInt0 = Integer.parseInt(temp0);
-                tempInt1 = Integer.parseInt(temp1);
-                tempInt2 = Integer.parseInt(temp2);
-                tempInt3 = Integer.parseInt(temp3);
-                mapLayer1.add(tempInt2, tempInt3, tempInt0, tempInt1);
+            if (counter == 5) {                                                                                         //Nach 5 Erhöhungen ist der erste Datensatz durchlaufen
+                counter = 0;                                                                                            //Counter wird wieder auf 0 gesetzt, nächster Datensatz
+                try {
+                tempIntSourceX = Integer.parseInt(tempStringSourceX);
+                }
+                catch (NumberFormatException e) {
+                    System.out.println("0");
+                    System.out.println("tempStringSourceX!!!");
+                    System.out.println(tempStringSourceX);
+                    System.out.println("tempStringSourceY");
+                    System.out.println(tempStringSourceY);
+                    System.out.println("tempStringDestinationX");
+                    System.out.println(tempStringDestinationX);
+                    System.out.println(i);
+                System.out.println();
+            }
+                try {
+                    tempIntSourceY = Integer.parseInt(tempStringSourceY);
+                } catch (NumberFormatException e) {
+                    System.out.println("1");
+                    System.out.println(tempStringSourceY);
+                    System.out.println(i);
+                    System.out.println();
+                }
+                try {
+                    tempIntDestinationX = Integer.parseInt(tempStringDestinationX);
+                } catch (NumberFormatException e) {
+
+                    System.out.println("2");
+                    System.out.println("tempStringSourceX:");
+                    System.out.println(tempStringSourceX);
+
+                    System.out.println("tempStringSourceY:");
+                    System.out.println(tempStringSourceY);
+
+                    System.out.println("tempStringDestinationX:");
+                    System.out.println(tempStringDestinationX);
+                    System.out.println(i);
+                    System.out.println("tempStringDestinationY:");
+                    System.out.println(tempStringDestinationY);
+
+                    System.out.println();
+                }
+                try {
+                    tempIntDestinationY = Integer.parseInt(tempStringDestinationY);
+                } catch (NumberFormatException e) {
+                    System.out.println("3");
+                    System.out.println("tempStringSourceY:");
+                    System.out.println(tempStringSourceY);
+                    System.out.println("tempStringDestinationX:");
+                    System.out.println(tempStringDestinationX);
+                    System.out.println(tempStringDestinationY);
+                    System.out.println(i);
+                    System.out.println();
+
+                }
+                tempBooleanCollision = Boolean.parseBoolean(tempStringKollision);
+                mapLayer1.add(tempIntDestinationX, tempIntDestinationY, tempIntSourceX, tempIntSourceY, tempBooleanCollision);
             }
         }
         for (int i = 0; i < mapLayer2StringArray.length; i++) {
 
             switch (counter) {
-                case 0 -> {
-                    temp0 = mapLayer2StringArray[i];
-                    temp0 = temp0.trim();
+                case 0 -> {                                                                                             //An Stelle 0 haben wir SourceX
+                    tempStringSourceX = mapLayer2StringArray[i];
+                    tempStringSourceX = tempStringSourceX.trim();
                 }
-                case 1 -> {
-                    temp1 = mapLayer2StringArray[i];
-                    temp1 = temp1.trim();
+                case 1 -> {                                                                                             //An Stelle 1 haben wir SourceY
+                    tempStringSourceY = mapLayer2StringArray[i];
+                    tempStringSourceY = tempStringSourceY.trim();
                 }
-                case 2 -> {
-                    temp2 = mapLayer2StringArray[i];
-                    temp2 = temp2.trim();
+                case 2 -> {                                                                                             //An Stelle 2 haben wir DestinationX
+                    tempStringDestinationX = mapLayer2StringArray[i];
+                    tempStringDestinationX = tempStringDestinationX.trim();
                 }
-                case 3 -> {
-                    temp3 = mapLayer2StringArray[i];
-                    temp3 = temp3.trim();
-
+                case 3 -> {                                                                                             //An Stelle 3 haben wir DestinationY
+                    tempStringDestinationY = mapLayer2StringArray[i];
+                    tempStringDestinationY = tempStringDestinationY.trim();
+                }
+                case 4 -> {                                                                                             //An Stelle 4 haben wir Kollision
+                    tempStringKollision = mapLayer2StringArray[i];
+                    tempStringKollision = tempStringKollision.trim();
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + counter);
             }
 
             counter++;
-            if (counter == 4) {
-                counter = 0;
-                tempInt0 = Integer.parseInt(temp0);
-                tempInt1 = Integer.parseInt(temp1);
-                tempInt2 = Integer.parseInt(temp2);
-                tempInt3 = Integer.parseInt(temp3);
-                mapLayer2.add(tempInt2, tempInt3, tempInt0, tempInt1);
+            if (counter == 5) {                                                                                         //Nach 5 Erhöhungen ist der erste Datensatz durchlaufen
+                counter = 0;                                                                                            //Counter wird wieder auf 0 gesetzt, nächster Datensatz
+                tempIntSourceX = Integer.parseInt(tempStringSourceX);
+                tempIntSourceY = Integer.parseInt(tempStringSourceY);
+                tempIntDestinationX = Integer.parseInt(tempStringDestinationX);
+                try {
+                    tempIntDestinationY = Integer.parseInt(tempStringDestinationY);
+                }
+                catch (NumberFormatException e){
+                    e.printStackTrace();
+                    System.err.println("7");
+                    System.out.println("tempStringSourceY:");
+                    System.out.println(tempStringSourceY);
+                    System.out.println("tempStringDestinationX:");
+                    System.out.println(tempStringDestinationX);
+                    System.out.println("tempStringDestinationY!!");
+                    System.out.println(tempStringDestinationY);
+                    System.out.println(i);
+                    System.out.println();
+                }
+
+                tempBooleanCollision = Boolean.parseBoolean(tempStringKollision);
+                mapLayer2.add(tempIntDestinationX, tempIntDestinationY, tempIntSourceX, tempIntSourceY, tempBooleanCollision);
             }
         }
+
         BlockArrayList[] map = new BlockArrayList[2];
         map[0] = mapLayer1;
         map[1] = mapLayer2;
 
         return map;
     }
-
 
     public BlockArrayList[] getLoadedMap() {
         return loadedMap;
@@ -158,7 +240,7 @@ public class LoadMap {
 
         } catch (IOException e) {
             System.out.println("Fehler beim Laden vom Sprite Image");
-            // TODO Hier muss noch geloggt werden
+            // TODO Hier muss noch geloggt werden > fatal
         }
         return bufferedImage;
     }

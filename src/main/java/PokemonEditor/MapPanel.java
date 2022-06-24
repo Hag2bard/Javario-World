@@ -168,7 +168,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     private void fillMapWithDummyBlocks(BlockArrayList mapLayer) {
         for (int destinationY = 0; destinationY < GuiData.fieldWidth; destinationY++) {
             for (int destinationX = 0; destinationX < GuiData.fieldHeight; destinationX++) {
-                mapLayer.add(-1, -1, destinationX, destinationY);
+                mapLayer.add(-1, -1, destinationX, destinationY, false);
             }
         }
     }
@@ -202,8 +202,8 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
 
                 for (int i = 0; i < tilePanel.getSelectedBlocksList().size(); i++) {
                     switch (selectedLayer) {
-                        case 1 -> mapLayer1.add(tilePanel.getSelectedBlocksList().get(i).x, tilePanel.getSelectedBlocksList().get(i).y, selectedX + x, selectedY + y);
-                        case 2 -> mapLayer2.add(tilePanel.getSelectedBlocksList().get(i).x, tilePanel.getSelectedBlocksList().get(i).y, selectedX + x, selectedY + y);
+                        case 1 -> mapLayer1.add(tilePanel.getSelectedBlocksList().get(i).x, tilePanel.getSelectedBlocksList().get(i).y, selectedX + x, selectedY + y, false);      //Hier wird erstmal ohne Kollision der ausgewählte Block hinzugefügt
+                        case 2 -> mapLayer2.add(tilePanel.getSelectedBlocksList().get(i).x, tilePanel.getSelectedBlocksList().get(i).y, selectedX + x, selectedY + y, false);      //Hier wird erstmal ohne Kollision der ausgewählte Block hinzugefügt
                     }
 
                     x++;
@@ -220,7 +220,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
 
                 }
                 if (doesNotExist) {
-                    mapLayer1.add(-1, -1, selectedX, selectedY);
+                    mapLayer1.add(-1, -1, selectedX, selectedY, false);
                     repaint();
                 }
             }

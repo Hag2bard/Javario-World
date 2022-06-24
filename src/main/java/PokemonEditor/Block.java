@@ -8,9 +8,10 @@ public class Block {
     private boolean isDummy = true;
     private boolean collides;
 
-    public Block(int sourceX, int sourceY, int destinationX, int destinationY) {
+    public Block(int sourceX, int sourceY, int destinationX, int destinationY, boolean collides) {
         this.source = new Point(sourceX, sourceY);
         this.destination = new Point(destinationX, destinationY);
+        this.collides = collides;
     }
     public boolean collides() {
         return collides;
@@ -20,7 +21,7 @@ public class Block {
         this.collides = collides;
         return this;
     }
-    
+
     public int getSourceX() {
         return source.x;
     }
