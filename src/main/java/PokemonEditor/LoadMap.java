@@ -155,6 +155,7 @@ public class LoadMap {
                     System.out.println(tempStringSourceY);
                     System.out.println("tempStringDestinationX:");
                     System.out.println(tempStringDestinationX);
+                    System.out.println("tempStringDestinationY");
                     System.out.println(tempStringDestinationY);
                     System.out.println(i);
                     System.out.println();

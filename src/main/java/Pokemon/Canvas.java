@@ -41,6 +41,7 @@ public class Canvas extends JPanel {    //Klasse Start
     public Canvas() {    //Konstruktor Start
         canvas = this;
 
+//        Starte Spiel
         loadMap = new LoadMap();
         if (loadMap.getMapString() != null) {
             this.mapLayer1 = loadMap.getLoadedMap()[0];

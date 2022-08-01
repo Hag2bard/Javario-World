@@ -111,8 +111,8 @@ public class PokeEditor extends KeyAdapter {
 
         //Kurzfristig
 
-        View view = new View();
-        mapCreator.setVisible(false);
+//        View view = new View();                                                                                         //TODO Startet Spiel
+//        mapCreator.setVisible(false);
 
         //
 
