@@ -8,10 +8,12 @@ public class Block {
     private boolean isDummy = true;
 
 
-    public Block(int sourceX, int sourceY, int destinationX, int destinationY) {
+    public Block(int sourceX, int sourceY, int destinationX, int destinationY, boolean isDummy) {
         this.source = new Point(sourceX, sourceY);
         this.destination = new Point(destinationX, destinationY);
+        this.isDummy = isDummy;
     }
+
 
     public int getSourceX() {
         return source.x;
@@ -40,9 +42,17 @@ public class Block {
         return isDummy;
     }
 
-    public Block setDummy(boolean dummy) {
-        isDummy = dummy;
+    public Block setIsDummy(boolean isDummy) {
+        this.isDummy = isDummy;
         return this;
+    }
+
+    /**
+     * Gibt sauberen Klon dieses Blocks zurück
+     * @return Neuer Block mit selben Koordinaten
+     */
+    public Block getClone(){
+        return new Block(getSourceX(), getSourceY(), getDestinationX(), getDestinationY(), this.isDummy);
     }
 
 }

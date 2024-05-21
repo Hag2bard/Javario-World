@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>hag2bard</groupId>
+    <!-- Das gesamte Projekt ist wie der Berliner Flughafen, da ich mit lediglich 6 Monaten
+    Java-Erfahrung dieses Projekt startete.
+    Zuerst sollte es ein Pokemon(Gameboy)-Klon werden, später entschied ich mich für Super Mario World(SNES).
+    Ich hoffe Nintendo nimmt mir das nicht übel. Ich hab gehört die brechen einem gerne mal die Finger.
+    Aber ich denke selbst der jüngste Junior-Developer, der damals an Super Mario World gearbeitet hat,
+    ist mittlerweile an den Nachwirkungen des Ersten Weltkriegs gestorben.
+    -->
+    <artifactId>Javario-World</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+    <dependencies>
+        <!-- Zehntausend mal besser als dieses blöde Jackson -->
+        <!-- Gson: Java to Json conversion -->
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+        <!-- Wir nehmen hier natürlich immer die älteste Version, weil wir das schon immer so gemacht haben -->
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.11.0-M1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.32</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- JMH ist ein sehr alltagstaugliches Tool. Erst gestern half es mir dabei einen Ikea-Schrank
+               aufzubauen. Ich habe dafür UNGEFÄHR 1.257.831.075 ms gebraucht.
+               Hierbei nutze ich die Options:
+               0 Warmup-Iterations; 1 Measurement-Iteration; SingleShot Mode, da ich
+               bei Gott wirklich nicht so viele Ikea-Regale zum Testen da hatte.
+               -->
+        <!-- https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-core -->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.37</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.openjdk.jmh/jmh-generator-annprocess -->
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.37</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

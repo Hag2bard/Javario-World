@@ -1,19 +1,19 @@
 package PokemonEditor;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+/**
+ * Panel für die Vorschau des aktuell
+ */
 public class PreviewPanel extends JPanel {
     private final TilePanel tilePanel;
     private BufferedImage tilesetBufferedImage;
     private final int TILESIZE = 16;
     public final int ZOOM = 8;
     public static PreviewPanel instance;
-    public static Logger LOG = LogManager.getLogger(PreviewPanel.class);
 
     public PreviewPanel() {
         tilePanel = TilePanel.getExistingInstance();
@@ -53,7 +53,7 @@ public class PreviewPanel extends JPanel {
      */
     public static PreviewPanel getExistingInstance() {
         if (instance == null) {
-            LOG.fatal("Instanz von PreviewPanel existiert noch nicht");
+            System.err.println("Instanz von PreviewPanel existiert noch nicht");
         }
         return instance;
     }

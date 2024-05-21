@@ -1,10 +1,10 @@
 package editor.app;
 
-import PokemonEditor.PokeEditor;
+import PokemonEditor.MapEditor;
 
 public class Main {
     public static void main(String[] args) {
-        PokeEditor pokeEditor = PokeEditor.getInstance();
+        MapEditor mapEditor = MapEditor.getInstance("Main");
 
 // sehr viele Layer, damit man diese als Objekte behandeln kann. So kann man z.b. Häuser verschieben
 //Rückgängig Button vervollständigen

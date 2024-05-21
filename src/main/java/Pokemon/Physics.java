@@ -1,6 +1,6 @@
 package Pokemon;
 
-import PokemonEditor.BlockArrayList;
+import util.Logger;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -11,7 +11,6 @@ public class Physics {
 
     private final double gravitation = 9.81;                //    m/s           //Veränderte Gravitation lässt Mario langsamer hoch gleiten
     private int pixelPerTimerPass = 1;                      //muss verändert werden für Geschwindigkeit,
-    private final double timerPassInMs = 17;                           //so viele ms pro TimerDurchlauf
     private long timeElapsedInMs;
     private int jumpedPixelCounter = 0;
     private long fallStartTime;
@@ -20,28 +19,16 @@ public class Physics {
     private final int minimumSpeed = 4;              //3Mindestens 2 -> je höher dieser Wert, desto höher die Geschwindigkeit des Heros bei Kehrtwende von oben nach unten
     private final int jumpDownTimerSpeed = 30;
     private long start;
-    private List<Integer> pixelPerTimerPassList;
     private Hero mario;
-    private Canvas canvas;
-    private long startTime = System.currentTimeMillis();
-    private long duration = 0;
-    private int counterFrames = 0;
+    private final Canvas canvas;
     private boolean isJumping = false;
     private boolean isFalling = false;
     private boolean isRunning = true;
     Runnable animationRunnable;
     private Thread animationThread;
-    private volatile BufferedImage buffImageA;           //wird gerade angezeigt
-    private volatile BufferedImage buffImageB;           //steht parat für nächstes paint (kann NULL sein)
-    private volatile BufferedImage buffImageC;           //Wird gerade gemalt
-    private volatile BufferedImage buffImageD;           //Steht parat für das nächste Malen (ggf 2 Bilder)
-    private boolean isPainting = false;
-    Graphics graphicsBuffImageC;
-    boolean isDoRepaintActive = false;
     private int sleepDuration = 10;
 
 
-    private int FPS = 0;
 // Ein Counterdurchgang = 17ms
     // in 1 s = 58 Durchgänge = 58 Pixel
     // Mario 20 Pixel hoch = 2m?
@@ -50,49 +37,46 @@ public class Physics {
 
     public Physics(Canvas canvas) {
         this.canvas = canvas;
-        animationRunnable = new Runnable() {
-            @Override
-            public void run() {
-                while (isRunning) {
-                    if (canvas.isPressingLeftButton() && canvas.isPressingRightButton() && mario.getSpeed() == 0) {
-                        mario.setFeetPosition(2);
+        animationRunnable = () -> {
+            while (isRunning) {
+                if (canvas.isPressingLeftButton() && canvas.isPressingRightButton() && mario.getSpeed() == 0) {
+                    mario.setFeetPosition(2);
+                }
+                if (mario.getSpeed() > 0) {
+                    if (isJumping || isFalling) {
+                        mario.setFeetPosition(2);                                                                   //FeetPosition 2 beim Jump heißt, dass Mario rechts guckt
                     }
-                    if (mario.getSpeed() > 0) {
-                        if (isJumping || isFalling) {
-                            mario.setFeetPosition(2);                                                                   //FeetPosition 2 beim Jump heißt, dass Mario rechts guckt
-                        }
-                        if (mario.getPositionX() >= mario.getFinalPositionX() && !isJumping && !isFalling) {            //Wenn 16 Pixel/halber Block erreicht dann feetPosition changen
-                            mario.changeFeetPosition();
-                            mario.refreshFinalPositionX();
-                        }
-                    }
-                    if (mario.getSpeed() < 0) {
-                        if (isJumping || isFalling) {
-                            mario.setFeetPosition(1);                                                                   //Wenn Mario links guckt, muss das entsprechende Bild gezeichnet werden
-                        }
-                        if (mario.getPositionX() <= mario.getFinalPositionX() && !isJumping && !isFalling) {            //Wenn 16 Pixel/halber Block erreicht dann feetPosition changen
-                            mario.changeFeetPosition();
-                            mario.refreshFinalPositionX();
-                        }
-                    }
-                    mario.move(mario.getSpeed());
-                    //////////////////////////////////// MOVETIMER VORBEI
-                    if (isJumping) {
-                        mario.setDirection(Direction.UP);
-                        timerDrivenJumpMethod();
-                    }
-                    if (isFalling) {
-                        mario.setDirection(Direction.DOWN);                                                             //Wenn Mario fällt, dann setze Direction auf "down"
-                        timerDrivenFallMethod(jumpDownTimerSpeed);
-                    }
-                    try {
-                        Thread.sleep(sleepDuration);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if (mario.getPositionX() >= mario.getFinalPositionX() && !isJumping && !isFalling) {            //Wenn 16 Pixel/halber Block erreicht dann feetPosition changen
+                        mario.changeFeetPosition();
+                        mario.refreshFinalPositionX();
                     }
                 }
-                canvas.repaint();
+                if (mario.getSpeed() < 0) {
+                    if (isJumping || isFalling) {
+                        mario.setFeetPosition(1);                                                                   //Wenn Mario links guckt, muss das entsprechende Bild gezeichnet werden
+                    }
+                    if (mario.getPositionX() <= mario.getFinalPositionX() && !isJumping && !isFalling) {            //Wenn 16 Pixel/halber Block erreicht dann feetPosition changen
+                        mario.changeFeetPosition();
+                        mario.refreshFinalPositionX();
+                    }
+                }
+                mario.move(mario.getSpeed());
+                //////////////////////////////////// MOVETIMER VORBEI
+                if (isJumping) {
+                    mario.setDirection(Direction.UP);
+                    timerDrivenJumpMethod();
+                }
+                if (isFalling) {
+                    mario.setDirection(Direction.DOWN);                                                             //Wenn Mario fällt, dann setze Direction auf "down"
+                    timerDrivenFallMethod(jumpDownTimerSpeed);
+                }
+                try {
+                    Thread.sleep(sleepDuration);
+                } catch (InterruptedException e) {
+                    Logger.error(e.getMessage());
+                }
             }
+            canvas.repaint();
         };
         animationThread = new Thread(animationRunnable);
 
@@ -144,7 +128,7 @@ public class Physics {
                 System.out.println();                                                                                   //debug
 
                 setJumpedPixelCounter(0);                                                                               //Gesprungene Pixel wieder auf 0 setzen, da Sprung zurückgesetzt wird
-                setFallStartTime(System.currentTimeMillis());
+                setStartTimeOfFall(System.currentTimeMillis());
                 isFalling = true;                                                                                       //Fallen eingeleitet
                 break;                                                                                                  //Wenn If Bedingung eintritt, for Schleife abbrechen
             }
@@ -242,7 +226,7 @@ public class Physics {
         return fallStartTime;
     }
 
-    public Physics setFallStartTime(long fallStartTime) {
+    public Physics setStartTimeOfFall(long fallStartTime) {
         this.fallStartTime = fallStartTime;
         return this;
     }
@@ -270,10 +254,6 @@ public class Physics {
         return this;
     }
 
-
-    public List<Integer> getPixelPerTimerPassList() {
-        return pixelPerTimerPassList;
-    }
 
 
     public Physics setHeroObject(Hero mario) {
