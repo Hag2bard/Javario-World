@@ -1,8 +1,6 @@
 package PokemonEditor;
 
 import PokemonEditor.listener.MouseListenerWithDefaults;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -22,10 +20,11 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
     private int amountOfSelectedBlocks = 1;    // kann auch 3 sein oder 4 oder 1!!!
     public static TilePanel instance;
     private Point mouseOnPosition;
-    public static Logger LOG = LogManager.getLogger(TilePanel.class);
 
 
     private TilePanel() {
+        this.addMouseListener(this);
+        this.addMouseMotionListener(this);
         selectedBlocksList = new LinkedList<>();
         selectedBlocksList.add(new Point(0, 0));  //Hier wird am Anfang ein ausgewählter Block festgelegt
         loadBufferedImage();
@@ -59,7 +58,7 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.drawImage(tilesetBufferedImage, 0, 0, GuiData.tilesetWidth, GuiData.tilesetHeight, null);
+        g.drawImage(tilesetBufferedImage, 0, 0, RGuiSizes.TILESET_WIDTH_PIXELS, RGuiSizes.TILESET_HEIGHT_PIXELS, null);
         g.setColor(Color.RED);
         int selectedBlocksX;
         int selectedBlocksY;
@@ -77,17 +76,21 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
      */
     private void loadBufferedImage() {
         try {
-            tilesetBufferedImage = ImageIO.read(new FileInputStream(GuiData.filenameTileset));
+            tilesetBufferedImage = ImageIO.read(new FileInputStream(RGuiSizes.FILENAME_TILESET));
         } catch (IOException e) {
-            LOG.fatal("Fehler beim Laden von " + GuiData.filenameTileset);
+            System.err.println("Fehler beim Laden von " + RGuiSizes.FILENAME_TILESET);
         }
     }
 
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Logic.getInstance().setDeleteInactive();
-        PokeEditor.getInstance().getBtnPickupTool().setSelected(false);
+        MapEditor mapEditor = MapEditor.getInstance("Methode mouseClicked in TilePanel.class");
+        // Wenn man ins TilePanel klickt, soll Löschen deaktiviert werden
+        mapEditor.setDeleteInactive();
+        // Wenn man ins TilePanel klickt, soll Pickup deaktiviert werden
+        mapEditor.setPickupInactive();
+
         selectedBlocksList.clear();                                                         //Selektierte Blöcke abwählen, da ein neuer Klick neue Blöcke auswählt
         for (int y = 0; y < amountOfSelectedBlocks; y++) {                                  //Entsprechende Schleifendurchgänge je nachdem wie viele Blöcke in
             for (int x = 0; x < amountOfSelectedBlocks; x++) {                                  //X bzw. Y Richtung ausgewählt werden sollen
@@ -123,7 +126,7 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
     public void moveRight() {
 
 
-        if (!selectedBlocksList.isEmpty() && selectedBlocksList.get((selectedBlocksList.size() - 1)).x < ((GuiData.tilesetWidth/TILESIZE)-1)) { //Wenn selectedBlocks nicht leer ist und die ganz rechte Auswahl kleiner ist als 15(bei 256 Pixel Breite)
+        if (!selectedBlocksList.isEmpty() && selectedBlocksList.get((selectedBlocksList.size() - 1)).x < ((RGuiSizes.TILESET_WIDTH_PIXELS / TILESIZE) - 1)) { //Wenn selectedBlocks nicht leer ist und die ganz rechte Auswahl kleiner ist als 15(bei 256 Pixel Breite)
             Point previousSelected = new Point(selectedBlocksList.get(0).x, selectedBlocksList.get(0).y);                                      //speichert vor den nachfolgenden Aktionen den gewählten Block zwischen
             selectedBlocksList.clear();                                                             //löscht alle selektieren Blocks aus der Liste
             for (int y = 0; y < amountOfSelectedBlocks; y++) {         //durchläuft for Schleife je nach Anzahl der selektierten Blocks und speichert die vorherigen Werte(x+1)
@@ -163,7 +166,7 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
 //        bar.setValue(bar.getValue() + 100);
 //PokeEditor.getInstance().scrollTilePanel();
 
-        if (!selectedBlocksList.isEmpty() && selectedBlocksList.getLast().y < (GuiData.tilesetHeight/TILESIZE-1)) {  //Wenn selectedBlocks nicht leer ist und die unterste Auswahl kleiner ist als 997
+        if (!selectedBlocksList.isEmpty() && selectedBlocksList.getLast().y < (RGuiSizes.TILESET_HEIGHT_PIXELS / TILESIZE - 1)) {  //Wenn selectedBlocks nicht leer ist und die unterste Auswahl kleiner ist als 997
             Point previousSelected = new Point(selectedBlocksList.get(0).x, selectedBlocksList.get(0).y);    //speichert vor den nachfolgenden Aktionen den gewählten Block zwischen
             selectedBlocksList.clear();                                                              //löscht alle selektieren Blocks aus der Liste
             for (int y = 0; y < amountOfSelectedBlocks; y++) {          //durchläuft for Schleife je nach Anzahl der selektierten Blocks und speichert die vorherigen Werte(y+1)
@@ -186,7 +189,7 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
                 }
             }
         }
-        PokeEditor.getInstance().refreshTxtFieldAmountOfSelectedBlocks();               //Textfield aktualisieren
+        MapEditor.getInstance("Methode refreshSelectedBlocks in TilePanel").updateTxtFieldAmountOfSelectedBlocks();               //Textfield aktualisieren
     }
 
 
@@ -225,9 +228,9 @@ public class TilePanel extends JPanel implements MouseListenerWithDefaults, Mous
      * @return
      * @throws Exception wenn Tileset-Bild noch nicht geladen wurde
      */
-    public BufferedImage getBufferedImage() throws Exception {
+    public BufferedImage getBufferedImage() throws IOException {
         if (tilesetBufferedImage == null) {
-            throw new RuntimeException("Das Tileset-Bild wurde noch nicht geladen");
+            throw new IOException("Das Tileset-Bild wurde nicht geladen");
         }
         return tilesetBufferedImage;
     }

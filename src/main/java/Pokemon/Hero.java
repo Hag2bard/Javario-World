@@ -48,7 +48,6 @@ public class Hero {
         for (int i = 0; i < pixel; i++) {
             positionY--;
             canvas.repaint();
-
         }
     }
 
@@ -56,7 +55,6 @@ public class Hero {
         for (int i = 0; i < pixel; i++) {
             positionY++;
             canvas.repaint();
-
         }
     }
 
@@ -66,7 +64,6 @@ public class Hero {
         }
         if (speed < 0) {
             finalPositionX = positionX - (canvas.getTILESIZE() / 2) * canvas.getZOOM();
-
         }
     }
 

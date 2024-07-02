@@ -1,28 +1,42 @@
 package Pokemon;
 
-import PokemonEditor.*;
+import PokemonEditor.BlockList;
+import PokemonEditor.FileLoader;
+import PokemonEditor.RGuiSizes;
+import PokemonEditor.TilePanel;
+import lombok.Getter;
+import util.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class Canvas extends JPanel {    //Klasse Start
 
-    private BlockArrayList mapLayer1;
-    private BlockArrayList mapLayer2;
+    @Getter
+    private BlockList mapLayer1;
+    @Getter
+    private BlockList mapLayer2;
 
+    @Getter
     private BufferedImage tilesetBufferedImage;
+    @Getter
     private final BufferedImage spritesBufferedImage;
+    @Getter
     private final int ZOOM = 4; //TODO muss noch eingebaut werden 4 ist Standard
+    @Getter
     private final int TILESIZE = 16;
+    @Getter
     private final int OFFSET = 11 * ZOOM;  //umso höher umso höher zeichnet er
     //    private final Physics physics;   //ohne thread
     private Physics physics;   //mit thread
     private final Hero mario;
     //    private final MediaPlayer mediaPlayer;
-    private final LoadMap loadMap;
+    private final FileLoader fileLoader;
     private boolean isPressingRightButton = false;
     private boolean isPressingLeftButton = false;
     private boolean isPressingSpaceButton = false;
@@ -35,12 +49,7 @@ public class Canvas extends JPanel {    //Klasse Start
 
     public Canvas() {    //Konstruktor Start
         canvas = this;
-        physicsThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                physics = new Physics(canvas);
-            }
-        });
+        physicsThread = new Thread(() -> physics = new Physics(canvas));
         physicsThread.start();
 //        physics = new Physics(this);  //Ohne Thread
         keyBinding();
@@ -51,22 +60,22 @@ public class Canvas extends JPanel {    //Klasse Start
 
 //        mediaPlayer = new MediaPlayer();
 //        mediaPlayer.playWav();
-        loadMap = new LoadMap();
-
-        if (loadMap.getMapString() != null) {
-            this.mapLayer1 = loadMap.getLoadedMap()[0];
-            this.mapLayer2 = loadMap.getLoadedMap()[1];
-        }
-
+        fileLoader = new FileLoader();
+        BlockList[] loadedMap;
         try {
-            tilesetBufferedImage = TilePanel.getExistingInstance().getBufferedImage();
-        } catch (Exception e) {
-            System.err.println("Konnte TilePanel-Image nicht holen");
-            e.printStackTrace();
+            loadedMap = fileLoader.loadMap();
+            this.mapLayer1 = loadedMap[0];
+            this.mapLayer2 = loadedMap[1];
+            this.tilesetBufferedImage = TilePanel.getExistingInstance().getBufferedImage();
+        } catch (FileNotFoundException fileNotFoundException) {
+            String errorMessage = "Sie haben keine Datei ausgewählt!";
+            Logger.error(errorMessage);
+            JOptionPane.showMessageDialog(null, errorMessage);
+        } catch (IOException e) {
+            Logger.error(e.getMessage());
         }
 
-        spritesBufferedImage = loadMap.getBufferedImage(GuiData.filenameSpriteSet);
-
+        spritesBufferedImage = new FileLoader().getBufferedImage(RGuiSizes.FILENAME_SPRITE_SET);
 
         setFocusable(true);
         requestFocusInWindow();
@@ -189,7 +198,7 @@ public class Canvas extends JPanel {    //Klasse Start
     }
 
 
-    public void paintLayer(Graphics g, BlockArrayList mapLayer) {
+    public void paintLayer(Graphics g, BlockList mapLayer) {
         for (int i = 0; i < mapLayer.size(); i++) {
             g.drawImage(canvas.getTilesetBufferedImage(), mapLayer.get(i).getDestinationX() * TILESIZE * ZOOM, mapLayer.get(i).getDestinationY() * TILESIZE * ZOOM, (mapLayer.get(i).getDestinationX() + 1) * TILESIZE * ZOOM, (mapLayer.get(i).getDestinationY() + 1) * TILESIZE * ZOOM, mapLayer.get(i).getSourceX() * TILESIZE, mapLayer.get(i).getSourceY() * TILESIZE, (mapLayer.get(i).getSourceX() + 1) * TILESIZE, (mapLayer.get(i).getSourceY() + 1) * TILESIZE, null);
         }
@@ -198,29 +207,37 @@ public class Canvas extends JPanel {    //Klasse Start
     public void paintHero(Graphics g, Direction direction, int feetPosition, int positionX, int positionY) {
         if (mario.getDirection().equals(Direction.LEFT)) {
             switch (mario.getFeetPosition()) {                                                                                                                        //+ZOOM=Korrektur
-                case 1 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 91, 17, 118 + 1, null); //links Fuß vorn
-                case 2 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 91, 35, 118 + 1, null); //links stehend
+                case 1 ->
+                        g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 91, 17, 118 + 1, null); //links Fuß vorn
+                case 2 ->
+                        g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 91, 35, 118 + 1, null); //links stehend
                 case 3 -> System.err.println("FALL 3 bei LEFT ist aufgetreten!!!!!!!!!!!!");
             }
         }
         if (direction.equals(Direction.RIGHT)) {
             switch (feetPosition) {                                                 // offset ist der Wert wieviel über 16 Pixel Block gezeichnet werden soll        //+ZOOM=Korrektur
-                case 1 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 31, 17, 58 + 1, null); //rechts Fuß vorn
-                case 2 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 31, 35, 58 + 1, null); //rechts stehend
+                case 1 ->
+                        g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 1, 31, 17, 58 + 1, null); //rechts Fuß vorn
+                case 2 ->
+                        g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM) + ZOOM, 19, 31, 35, 58 + 1, null); //rechts stehend
                 case 3 -> System.err.println("FALL 3 bei RIGHT ist aufgetreten!!!!!!!!!!!!");
             }
         }
         if (direction.equals(Direction.UP)) {               //Springen
             switch (feetPosition) {
-                case 1 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 1, 1, 17, 28 + 1, null); //Springen links
-                case 2 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 19, 1, 35, 28 + 1, null); //Springen rechts
+                case 1 ->
+                        g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 1, 1, 17, 28 + 1, null); //Springen links
+                case 2 ->
+                        g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - OFFSET - ZOOM, positionX + TILESIZE * ZOOM, (positionY + TILESIZE * ZOOM), 19, 1, 35, 28 + 1, null); //Springen rechts
                 case 3 -> System.err.println("FALL 3 bei UP ist aufgetreten!!!!!!!!!!!!");
             }
         }
         if (direction.equals(Direction.DOWN)) {             //Fallen
             switch (feetPosition) {
-                case 1 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 1, 61, 17, 89, null); //Fallen links
-                case 2 -> g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 19, 61, 35, 89, null); //Fallen rechts
+                case 1 ->
+                        g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 1, 61, 17, 89, null); //Fallen links
+                case 2 ->
+                        g.drawImage(canvas.getSpritesBufferedImage(), positionX, positionY - canvas.getOFFSET() - ZOOM, positionX + TILESIZE * ZOOM, positionY + TILESIZE * ZOOM, 19, 61, 35, 89, null); //Fallen rechts
                 case 3 -> System.err.println("FALL 3 bei DOWN ist aufgetreten!!!!!!!!!!!!");
             }
         }
@@ -228,11 +245,10 @@ public class Canvas extends JPanel {    //Klasse Start
     }
 
 
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
+
         last_time = System.nanoTime();
         super.paintComponent(g);
         paintLayer(g, mapLayer1);                                                                                       //Layer1 wird gezeichnet
@@ -246,25 +262,6 @@ public class Canvas extends JPanel {    //Klasse Start
         g.drawString("FrameTime: " + delta_time, 50, 50);
 
         counter++;
-        }
-
-    
-
-    public BlockArrayList getMapLayer1() {
-        return mapLayer1;
-    }
-
-    public BlockArrayList getMapLayer2() {
-        return mapLayer2;
-    }
-
-
-    public BufferedImage getTilesetBufferedImage() {
-        return tilesetBufferedImage;
-    }
-
-    public BufferedImage getSpritesBufferedImage() {
-        return spritesBufferedImage;
     }
 
 
@@ -280,17 +277,5 @@ public class Canvas extends JPanel {    //Klasse Start
         return isPressingSpaceButton;
     }
 
-
-    public int getOFFSET() {
-        return OFFSET;
-    }
-
-    public int getZOOM() {
-        return ZOOM;
-    }
-
-    public int getTILESIZE() {
-        return TILESIZE;
-    }
 
 }

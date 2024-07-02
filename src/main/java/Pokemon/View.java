@@ -7,6 +7,9 @@ public class View extends JFrame {
 
     private Canvas canvas;
 
+    /**
+     * Dies ist die View für das Spiel
+     */
     public View() {
         canvas = new Canvas();
         add(canvas);
