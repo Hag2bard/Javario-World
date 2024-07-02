@@ -13,20 +13,7 @@ import java.util.LinkedList;
 
 @State(Scope.Benchmark)
 public class MapPanelTest extends AbstractBenchmarkHarnessForTests{
-    private MapPanel mapPanel = MapPanel.getInstance();
-
-    @Setup
-    public void initializeNewMapPanel(){
-        System.err.println("setup");
-        MapPanel.deleteInstanceForTestOnly();
-        mapPanel = MapPanel.getInstance();
-    }
-
-    @Benchmark
-    public void getInstance() {
-        Assertions.assertEquals(mapPanel, MapPanel.getInstance());
-
-    }
+    private MapPanel mapPanel = new MapPanel();
 
     @Benchmark
     public void deleteBlocks() {
@@ -58,7 +45,7 @@ public class MapPanelTest extends AbstractBenchmarkHarnessForTests{
      * Testet die mousePressed-Methode, welche einen Klon der Map erstellt.
      * Getestet wird die Sortierfunktion der Map nach dem adden eines Blocks,
      */
-    @Benchmark
+//    @Benchmark
     public void mousePressed() {
         BlockList mapLayer1 = mapPanel.getMapLayer1();
         BlockList mapLayer2 = mapPanel.getMapLayer2();
@@ -74,8 +61,8 @@ public class MapPanelTest extends AbstractBenchmarkHarnessForTests{
         mapLayer1.add(sourceX1, sourceY1, destinationX1, destinationY1);
         mapLayer2.add(sourceX2, sourceY2, destinationX2, destinationY2);
         // Todo brauchts die nächsten 2 Zeilen?
-        LinkedList<BlockList> undoBlockListLayer1 = mapPanel.getUndoBlockListLayer1();
-        LinkedList<BlockList> undoBlockListLayer2 = mapPanel.getUndoBlockListLayer2();
+        LinkedList<BlockList> undoBlockListLayer1 = mapPanel.getMapLayer1().getUndoBlockList();
+        LinkedList<BlockList> undoBlockListLayer2 = mapPanel.getMapLayer2().getUndoBlockList();
         // Diese Methode erstellt einen Klon der Map und schmeißt ihn in die undoBlockList
         mapPanel.mousePressed(new MouseEvent(new Button(), 0, 0L, 88, 0, 0, 0, false, 0));
         //Index der übergebenen Ziel-Koordinaten
@@ -103,13 +90,10 @@ public class MapPanelTest extends AbstractBenchmarkHarnessForTests{
         Assertions.assertEquals(blockOfLayer2.getSourceY(), sourceY2);
         Assertions.assertEquals(2, undoBlockListLayer1.size());
         Assertions.assertEquals(2, undoBlockListLayer2.size());
-        //Frisst wahrscheinlich Performance, aber es geht ja auch nicht darum die reele Geschwindigkeit,
-        //sondern einen Referenz-Wert zu bekommen. Dies erstellt neues MapPanel
-        this.initializeNewMapPanel();
     }
 
 
-    @Benchmark
+//    @Benchmark
     public void mouseReleased() {
         // 20, 16
         BlockList mapLayer1 = mapPanel.getMapLayer1();

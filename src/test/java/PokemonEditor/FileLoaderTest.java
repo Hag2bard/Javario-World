@@ -2,11 +2,13 @@ package PokemonEditor;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.FileNotFoundException;
+
 class FileLoaderTest {
     FileLoader fileLoader = new FileLoader();
 
     @Test
-    void openJFileChooserForLoadingMapLayers() {
+    void openJFileChooserForLoadingMapLayers() throws FileNotFoundException {
         String string = fileLoader.openJFileChooserForLoadingMap();
         System.out.println();
     }

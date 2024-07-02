@@ -112,7 +112,7 @@ public class BlockList {
     //Komplizierter Sortier-Algorithmus, der dafür zuständig ist die Blockliste nach den Zielkoordinaten
     // zu sortieren.
     // TODO Grund nachtragen
-    public void sortList() {
+    public void orderByDestinationCoordinates() {
         actualBlockList.sort(Comparator.comparingInt(Block::getDestinationY).thenComparingInt(Block::getDestinationX));
     }
 
@@ -142,7 +142,7 @@ public class BlockList {
             }
             boolean isInitialDummyBlock = sourceX == -1;
             actualBlockList.add(new Block(sourceX, sourceY, destinationX, destinationY, isInitialDummyBlock));
-            sortList();
+            orderByDestinationCoordinates();
         }
         return this;
     }
@@ -186,9 +186,8 @@ public class BlockList {
     public void refreshDummyBlocks() {
         System.out.println("refreshDummyBlocks");
         for (Block block : actualBlockList) {
-            block.setIsDummy(block.getSourceX() < 0 || block.getSourceX() > RGuiSizes.LAST_X_BLOCK || block.getSourceY() < 0 || block.getSourceY() > RGuiSizes.LAST_Y_BLOCK);
+            block.refreshDummyStatus();
         }
-
     }
 
     /**
@@ -223,7 +222,7 @@ public class BlockList {
 //                }
             }
         }
-        sortList();
+        orderByDestinationCoordinates();
     }
 
     /**

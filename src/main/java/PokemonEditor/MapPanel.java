@@ -23,7 +23,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     private int selectedY = -1;
     private BufferedImage tilesetBufferedImage;
     private final int TILESIZE = 16;
-    public static final int ZOOM = 2;
+    public static final int ZOOM_FACTOR = 2;
     private final List<Point> selectedBlocksOnMapPanel;
     private int selectedLayer = 1;
     private int mousePositionX = 0;
@@ -43,7 +43,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     private boolean isOnMapPanel = false;
 
 
-    private MapPanel() {
+    public MapPanel() {
         tilePanel = TilePanel.getInstance();
         //Aktuell sind 2 Layer editierbar, der 3. ist nur als Vorschau gedacht
         mapLayer1 = new BlockList(true);
@@ -61,21 +61,9 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
         }
     }
 
-    public static MapPanel getInstance() {
-        if (instance == null) {
-            System.err.println("getInstance in MapPanel");
-            instance = new MapPanel();
-        }
-        return instance;
-    }
-
-    public static void deleteInstanceForTestOnly() {
-        instance = null;
-    }
-
     private void paintLayer(Graphics g, BlockList mapLayer) {
         for (int i = 0; i < mapLayer.size(); i++) {
-            g.drawImage(tilesetBufferedImage, mapLayer.get(i).getDestinationX() * TILESIZE * ZOOM, mapLayer.get(i).getDestinationY() * TILESIZE * ZOOM, (mapLayer.get(i).getDestinationX() + 1) * TILESIZE * ZOOM, (mapLayer.get(i).getDestinationY() + 1) * TILESIZE * ZOOM, mapLayer.get(i).getSourceX() * TILESIZE, mapLayer.get(i).getSourceY() * TILESIZE, (mapLayer.get(i).getSourceX() + 1) * TILESIZE, (mapLayer.get(i).getSourceY() + 1) * TILESIZE, null);
+            g.drawImage(tilesetBufferedImage, mapLayer.get(i).getDestinationX() * TILESIZE * ZOOM_FACTOR, mapLayer.get(i).getDestinationY() * TILESIZE * ZOOM_FACTOR, (mapLayer.get(i).getDestinationX() + 1) * TILESIZE * ZOOM_FACTOR, (mapLayer.get(i).getDestinationY() + 1) * TILESIZE * ZOOM_FACTOR, mapLayer.get(i).getSourceX() * TILESIZE, mapLayer.get(i).getSourceY() * TILESIZE, (mapLayer.get(i).getSourceX() + 1) * TILESIZE, (mapLayer.get(i).getSourceY() + 1) * TILESIZE, null);
         }
     }
 
@@ -136,7 +124,7 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     }
 
     private void drawBlocks(Graphics g) {
-        final int BLOCKSIZE = TILESIZE * ZOOM;
+        final int BLOCKSIZE = TILESIZE * ZOOM_FACTOR;
         int blockX = mousePositionX * BLOCKSIZE;
         int blockY = mousePositionY * BLOCKSIZE;
 
@@ -158,9 +146,9 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     }
 
     private void drawVerticalLines(Graphics g) {
-        int blockX = mousePositionX * TILESIZE * ZOOM;
-        int blockY = mousePositionY * TILESIZE * ZOOM;
-        final int BLOCKSIZE = TILESIZE * ZOOM;
+        int blockX = mousePositionX * TILESIZE * ZOOM_FACTOR;
+        int blockY = mousePositionY * TILESIZE * ZOOM_FACTOR;
+        final int BLOCKSIZE = TILESIZE * ZOOM_FACTOR;
 
         for (int x = blockX; x < (blockX + (tilePanel.getAmountOfSelectedBlocks() + 1) * BLOCKSIZE); x += BLOCKSIZE) {
             g.drawLine(x, blockY, x, blockY + (BLOCKSIZE * tilePanel.getAmountOfSelectedBlocks()));
@@ -168,9 +156,9 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     }
 
     private void drawHorizontalLines(Graphics g) {
-        int blockX = mousePositionX * TILESIZE * ZOOM;
-        int blockY = mousePositionY * TILESIZE * ZOOM;
-        final int BLOCKSIZE = TILESIZE * ZOOM;
+        int blockX = mousePositionX * TILESIZE * ZOOM_FACTOR;
+        int blockY = mousePositionY * TILESIZE * ZOOM_FACTOR;
+        final int BLOCKSIZE = TILESIZE * ZOOM_FACTOR;
 
         for (int y = blockY; y < (blockY + (tilePanel.getAmountOfSelectedBlocks() + 1) * BLOCKSIZE); y += BLOCKSIZE) {
             g.drawLine(blockX, y, blockX + (BLOCKSIZE * tilePanel.getAmountOfSelectedBlocks()), y);
@@ -182,8 +170,8 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
     public void mouseClicked(MouseEvent e) {
         System.out.println("mouseClicked in MapPanel");
 
-        mapLayer1.sortList();                                                               //Die Liste wird nach Reihenfolge sortiert
-        mapLayer2.sortList();                                                               //Die Liste wird nach Reihenfolge sortiert
+        mapLayer1.orderByDestinationCoordinates();                                                               //Die Liste wird nach Reihenfolge sortiert
+        mapLayer2.orderByDestinationCoordinates();                                                               //Die Liste wird nach Reihenfolge sortiert
 
         if (MapEditor.isPickupToolActive) {
             doPickup(e);
@@ -192,8 +180,8 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
             selectedX = e.getPoint().x;
             selectedY = e.getPoint().y;
             //rechne Koordinaten in Blöcken um (aus 20,20 Pixel wird Block 1,1):
-            selectedX = selectedX / (TILESIZE * ZOOM);
-            selectedY = selectedY / (TILESIZE * ZOOM);
+            selectedX = selectedX / (TILESIZE * ZOOM_FACTOR);
+            selectedY = selectedY / (TILESIZE * ZOOM_FACTOR);
             //Wenn nicht gelöscht wird: (hier evtl. Performance Probs)
             if (!MapEditor.isDeleteToolActive) {
                 //das selbe ist eventuell auch die selectedBlocks
@@ -299,67 +287,82 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
         repaint();
     }
 
-    public void sort(List<Point> selectedBlocksOnMapPanel) {
-        selectedBlocksOnMapPanel.sort(Comparator
+    /**
+     * Methode zum Sortieren nach Koordinaten
+     * (0,0 | 0,1 | 1,0 | 1,1 ...)
+     *
+     * @param pointListOfBlocks Liste mit Blocks und jeweils 2 Koordinaten.
+     */
+    public void orderPointListOfBlocks(List<Point> pointListOfBlocks) {
+        pointListOfBlocks.sort(Comparator
                 .comparingDouble(Point::getY)
                 .thenComparingDouble(Point::getX));
     }
 
     private void doPickup(MouseEvent e) {
         if (selectedLayer != 3) {
-            LinkedList<Point> backupSelectedBlocksOnTilePanel = new LinkedList<>(tilePanel.getSelectedBlocksList());
             LinkedList<Point> selectedBlocksOnTilePanel = tilePanel.getSelectedBlocksList();
-            selectedBlocksOnTilePanel.clear();                            //Befehl zum Löschen aller selektierten Blöcke
+            // Löschen aller selektierten Blöcke
+            selectedBlocksOnTilePanel.clear();
             selectedBlocksOnMapPanel.clear();
 
+            //////////////////////////////////////////////////////TODO AUSLAGERN
             // selectedBlocksOnMapPanel füllen
             for (int y = 0; y < tilePanel.getAmountOfSelectedBlocks(); y++) {
                 for (int x = 0; x < tilePanel.getAmountOfSelectedBlocks(); x++) {
-                    selectedBlocksOnMapPanel.add(new Point(((e.getPoint().x / (TILESIZE * ZOOM)) + x), ((e.getPoint().y / (TILESIZE * ZOOM)) + y)));   //hier holt er sich alle Blöcke die er je nach Größe picken kann
-
-                    sort(selectedBlocksOnMapPanel); //SelectedBlocks sortieren nach Reihe
-                    mapLayer1.sortList();
-                    mapLayer2.sortList();
+                    // Dies ist die Logik, welches die Mauskoordinaten, welche man vom MouseEvent
+                    // erhält, in Blöcke runterrechnet. Je nachdem wie viele Pixel ein Block hat
+                    // und ob ein Zoom-Faktor eingestellt ist
+                    selectedBlocksOnMapPanel.add(new Point(
+                            ((e.getPoint().x / (TILESIZE * ZOOM_FACTOR)) + x), ((e.getPoint().y / (TILESIZE * ZOOM_FACTOR)) + y)));
+                    // Ordnet die Liste der selektierten Blöcke, sowie die Block-Listen der Layer.
+                    orderPointListOfBlocks(selectedBlocksOnMapPanel);
+                    mapLayer1.orderByDestinationCoordinates();
+                    mapLayer2.orderByDestinationCoordinates();
                 }
             }
-
+            ///////////////////////////////////////////////////TODO AUSLAGERN
+            // selectedBlocksOnTilePanel füllen
             switch (selectedLayer) {
                 case 1:
-                    ////Auslagern
                     for (int i = 0; i < mapLayer1.size(); i++) {
-                        for (int b = 0; b < selectedBlocksOnMapPanel.size(); b++) {
-                            if (selectedBlocksOnMapPanel.get(b).x == mapLayer1.get(i).getDestinationX() && selectedBlocksOnMapPanel.get(b).y == mapLayer1.get(i).getDestinationY()) {
-                                selectedBlocksOnTilePanel.add(new Point(mapLayer1.get(i).getSourceX(), mapLayer1.get(i).getSourceY())); /// TODO !!!
-                                //TODO Hier werden leere Blöcke ignoriert und das soll nicht sein
+                        for (Point point : selectedBlocksOnMapPanel) {
+                            // Wenn ein selectedBlock dem aktuellen Block(i) aus der BlockListe(i) entspricht,
+                            // dann holen wir uns die Source-Koordinaten vom Block(i) für einen neuen Eintrag
+                            // in die Liste selectedBlocksOnTilePanel
+                            if (mapLayer1.get(i).hasSameDestinationCoordinates(point)) {
+                                selectedBlocksOnTilePanel.add(new Point(mapLayer1.get(i).getSource())); /// TODO !!!
                             }
+                            //TODO Hier werden leere Blöcke ignoriert und das soll nicht sein
                         }
                     }
-                    //TEST JUNIT HIER EINBAUEN
-
-
                     break;
+                //TEST JUNIT HIER EINBAUEN
                 case 2:
                     for (int i = 0; i < mapLayer2.size(); i++) {
-                        for (int b = 0; b < selectedBlocksOnMapPanel.size(); b++) {
-                            if (selectedBlocksOnMapPanel.get(b).x == mapLayer2.get(i).getDestinationX() && selectedBlocksOnMapPanel.get(b).y == mapLayer2.get(i).getDestinationY()) {
-                                selectedBlocksOnTilePanel.add(new Point(mapLayer2.get(i).getSourceX(), mapLayer2.get(i).getSourceY()));
+                        for (Point point : selectedBlocksOnMapPanel) {
+                            if (mapLayer2.get(i).hasSameDestinationCoordinates(point)) {
+                                selectedBlocksOnTilePanel.add(new Point(mapLayer2.get(i).getSource()));
                             }
                         }
                     }
                     break;
                 case 3:
-                    // TODO
+                    // TODO Achtung case 3 ist unreachable! Die Behandlung von Case 3 muss außerhalb
                 default:
-                    //ssssssss ///Was soll er im Falle eines anderen Layers machen? Soll er Informationen zu den Blöcken anzeigen? Eventuell mit Beschreibung? Beschreibung selber eingeben
-
+                    throw new RuntimeException("Ungültiger Layer ausgewählt!");
             }
             // Das Pickup Tool wird beendet sobald es einmal gepickt hat
             MapEditor.getInstance("MapPanel").setPickupInactive();
             tilePanel.setFocusable(true);
             tilePanel.repaint();
-            // PICKUP ENDE
         }
-    }
+        else {
+            // Case 3 behandeln!
+            // Was soll er beim Pickup in den dritten Layer machen?
+            // Soll er Informationen zu den Blöcken anzeigen? Eventuell mit Beschreibung? Beschreibung selber eingeben
+        }
+    } // doPickup Ende
 
     private BufferedImage loadBufferedImage(String filename) throws IOException {
         return ImageIO.read(new FileInputStream(filename));
@@ -418,8 +421,8 @@ public class MapPanel extends JPanel implements MouseListener, MouseMotionListen
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        mousePositionX = e.getPoint().x / (TILESIZE * ZOOM);
-        mousePositionY = e.getPoint().y / (TILESIZE * ZOOM);
+        mousePositionX = e.getPoint().x / (TILESIZE * ZOOM_FACTOR);
+        mousePositionY = e.getPoint().y / (TILESIZE * ZOOM_FACTOR);
         repaint();             //Zum Neuzeichnen der Kästchen bei jeder Bewegung der Maus
     }
 

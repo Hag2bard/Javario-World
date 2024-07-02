@@ -92,7 +92,8 @@ public class Physics {
         jumpDownTimerSpeed = (int) (jumpDownTimerSpeed / getGravitation()) * (int) (getFallDuration() / mario.getFallDelay());
         for (int i = 0; i < jumpDownTimerSpeed; i++) {
             mario.moveDown(1);                                                                                     //1 Pixel nach unten
-
+            // Mario fällt genauso viele Pixel wie er gesprungen ist
+            // TODO Kollisionen einbauen
             if (mario.getPositionY() == mario.getFinalPositionY()) {
                 isFalling = false;
                 setFallDuration(0);

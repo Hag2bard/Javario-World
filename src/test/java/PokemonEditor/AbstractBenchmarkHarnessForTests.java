@@ -15,12 +15,12 @@ import org.openjdk.jmh.runner.options.VerboseMode;
 public abstract class AbstractBenchmarkHarnessForTests
 {
    private final TimeUnit JMH_TIME_UNIT = TimeUnit.MICROSECONDS;
-   private final Integer MEASUREMENT_ITERATIONS = 20; // minimum value is 1 // default value is 20
-   private final Integer WARMUP_ITERATIONS = 10;      // minimum value is 0 // default value is 10 // Die Ergebnisse der Warmup Iterations werden weggeschmissen
-   private final Integer FORKS = 1; //0 is for debugging or for Spring Context Tests
+   private final Integer MEASUREMENT_ITERATIONS = 10; // minimum value is 1 // default value is 20
+   private final Integer WARMUP_ITERATIONS = 5;      // minimum value is 0 // default value is 10 // Die Ergebnisse der Warmup Iterations werden weggeschmissen
+   private final Integer FORKS = 5; //0 is for debugging or for Spring Context Tests
    private final Integer THREADS = 1; // Dem Prozessor anpassen!
    private final Mode BENCHMARK_MODE = Mode.AverageTime;
-   private final String RESULT_FILE_PATH = "C:/Entwicklung/jmh/";
+   private final String RESULT_FILE_PATH = "/home/dch/Dokumente/IntelliJ/Javario-World/jmh/";
    private Options options;
 
    public AbstractBenchmarkHarnessForTests()
@@ -73,7 +73,7 @@ public abstract class AbstractBenchmarkHarnessForTests
          .threads(THREADS)
          // Garbage Collection zwischen den Measurements wird angestoßen
          // Should do GC between measurementIterations?
-         .shouldDoGC(true)
+         .shouldDoGC(false)
          // Entscheidung ob der Junit-Runner abbricht bei Fehlschlag einer Benchmark-Methode
          .shouldFailOnError(true)
          .resultFormat(ResultFormatType.JSON)

@@ -14,8 +14,8 @@ public class MapEditorMenu extends JMenuBar {
     private final TilePanel tilePanel;
     private MapEditor mapEditor;
 
-    public MapEditorMenu() {
-        mapPanel = MapPanel.getInstance();
+    public MapEditorMenu(MapPanel mapPanel) {
+        this.mapPanel = mapPanel;
         System.err.println("Konstruktor MapEditorMenu");
         tilePanel = TilePanel.getInstance();
     }

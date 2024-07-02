@@ -38,25 +38,21 @@ public class MapEditor extends KeyAdapter {
 
 
     private MapEditor() {
-
         mapCreatorJFrame = new JFrame("Map-Editor");                                                                 //Neues JFrame, dieses Fenster
         // TODO Layout-Manager nutzen
         mapCreatorJFrame.setLayout(null);                                                                                     //ohne Layout-Manager
-//Auskommentiert weil nach TilePanel verschoben
-//        tilePanel.addMouseListener(tilePanel);
-//        tilePanel.addMouseMotionListener(tilePanel);
         tilePanel.addKeyListener(this);
         tilePanel.setFocusable(true);
         tilePanel.setPreferredSize(new Dimension(256, 432));
 
-        mapPanel = MapPanel.getInstance();
+        mapPanel = new MapPanel();
         System.err.println("Konstruktor MapEditor");
         mapPanel.addMouseListener(mapPanel);
         mapPanel.addMouseMotionListener(mapPanel);
         mapPanel.addKeyListener(this);
         mapPanel.setFocusable(true);
         mapPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-        mapPanel.setPreferredSize(new Dimension(RGuiSizes.MAP_FIELD_WIDTH * RGuiSizes.TILESIZE_PIXELS * MapPanel.ZOOM, RGuiSizes.MAP_FIELD_HEIGHT * RGuiSizes.TILESIZE_PIXELS * MapPanel.ZOOM));
+        mapPanel.setPreferredSize(new Dimension(RGuiSizes.MAP_FIELD_WIDTH * RGuiSizes.TILESIZE_PIXELS * MapPanel.ZOOM_FACTOR, RGuiSizes.MAP_FIELD_HEIGHT * RGuiSizes.TILESIZE_PIXELS * MapPanel.ZOOM_FACTOR));
 
 //        previewPanel = new PreviewPanel();
         previewPanel = PreviewPanel.getInstance();
@@ -90,11 +86,11 @@ public class MapEditor extends KeyAdapter {
 
         mapJScrollPane = new JScrollPane(mapPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);   //AS NEEDED!!!!
         mapJScrollPane.addKeyListener(this);
-        mapJScrollPane.setBounds(0, 0, (RGuiSizes.MAP_FIELD_WIDTH * RGuiSizes.TILESIZE_PIXELS * MapPanel.ZOOM) + 4, (RGuiSizes.MAP_FIELD_HEIGHT * RGuiSizes.TILESIZE_PIXELS * MapPanel.ZOOM) + 4);
+        mapJScrollPane.setBounds(0, 0, (RGuiSizes.MAP_FIELD_WIDTH * RGuiSizes.TILESIZE_PIXELS * MapPanel.ZOOM_FACTOR) + 4, (RGuiSizes.MAP_FIELD_HEIGHT * RGuiSizes.TILESIZE_PIXELS * MapPanel.ZOOM_FACTOR) + 4);
         mapJScrollPane.getVerticalScrollBar().setUnitIncrement(20);  //passen 20?
         mapJScrollPane.setFocusable(true);
         ////////////
-        MapEditorMenu mapEditorMenu = new MapEditorMenu();
+        MapEditorMenu mapEditorMenu = new MapEditorMenu(mapPanel);
         mapEditorMenu.addMenu();
         addButtonBar();
         ////////////
@@ -118,14 +114,6 @@ public class MapEditor extends KeyAdapter {
         mapCreatorJFrame.setSize(1650, 700);
         mapCreatorJFrame.setLocationRelativeTo(null);
         mapCreatorJFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-        //Kurzfristig
-
-//        View view = new View();
-//        mapCreator.setVisible(false);
-
-        //
-
     }
 
     /**

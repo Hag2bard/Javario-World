@@ -19,6 +19,7 @@ public class Main {
 
         /*
         Kollisionen erstellen für jeden einzelnen Layer.
+        Jeder Block benötigt Kollisionen
 
          */
 
